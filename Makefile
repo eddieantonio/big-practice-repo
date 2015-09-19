@@ -8,6 +8,6 @@ clean:
 	-$(RM) *.{o,hi}
 
 test: geewhiz
-	pandoc -t plain -F ./$< $<.lhs
+	pandoc -t html -F ./$< $<.lhs
 
 .PHONY: all test clean

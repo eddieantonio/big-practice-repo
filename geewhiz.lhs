@@ -7,7 +7,7 @@ This filter renders graphviz documents.
 
 ~~~ dot
 digraph {
-    h -> he  [text="Who Am the Only One"]
+    h -> he  [title="Who Am the Only One"]
 }
 ~~~
 
@@ -15,14 +15,14 @@ digraph {
 
 > import Text.Pandoc.JSON
 > import System.Process (readProcess)
-> import Data.ByteString.Char8 (ByteString, pack, unpack)
+> import Data.ByteString.Char8 (pack, unpack)
 > import Data.ByteString.Base64 (encode)
 
 > geewhiz :: Block -> IO Block
 > geewhiz (CodeBlock attr text)
 >   | isDot attr = do
->       pngData <- dot text
->       return $ image "graph" (dataurl "image/png" pngData)
+>       dot text
+>       return $ image "graph" "noname.gv.png"
 > geewhiz x = return x
 
 It's dot when the only class is `dot`.
@@ -34,8 +34,9 @@ It's dot when the only class is `dot`.
 To load a process, `readProcess`, passing the graph. Its return will be the
 rendered graph as binary.
 
-> dot :: String -> IO String
-> dot graph = readProcess "dot" ["-Tpng"] graph
+> dot :: String -> IO ()
+> dot graph =
+>   readProcess "dot" ["-O", "-Tpng"] graph >> return ()
 
 Now we create a data url from this:
 
