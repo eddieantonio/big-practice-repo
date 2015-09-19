@@ -15,14 +15,13 @@ digraph {
 
 > import Text.Pandoc.JSON
 > import System.Process (readProcess)
-> import Data.ByteString.Char8 (pack, unpack)
-> import Data.ByteString.Base64 (encode)
+> import Data.Hashable (hash)
 
 > geewhiz :: Block -> IO Block
 > geewhiz (CodeBlock attr text)
 >   | isDot attr = do
->       dot text
->       return $ image "graph" "noname.gv.png"
+>       name <- renderDot text
+>       return $ image "graph" name
 > geewhiz x = return x
 
 It's dot when the only class is `dot`.
@@ -31,18 +30,16 @@ It's dot when the only class is `dot`.
 > isDot (_, ["dot"], _) = True
 > isDot _ = False
 
-To load a process, `readProcess`, passing the graph. Its return will be the
-rendered graph as binary.
+To run a process, `readProcess`, passing the graph. Its return will be the
+filename.
 
-> dot :: String -> IO ()
-> dot graph =
->   readProcess "dot" ["-O", "-Tpng"] graph >> return ()
+> renderDot :: String -> IO String
+> renderDot graph = let
+>     name = (++".png") $ show $ hash graph
+>   in readProcess "dot" ["-Tpng", "-o" ++ name] graph >> return name
 
-Now we create a data url from this:
-
-> dataurl :: String -> String -> String
-> dataurl mediatype binary = "data:" ++ mediatype ++ ";base64," ++ media
->   where media = unpack $ encode $ pack binary
+Create an inline image. This will work both in HTML, LaTeX, and (probably)
+more!
 
 > image :: String -> String -> Block
 > image alt link = Plain [Image [Str alt] (link, alt)]
