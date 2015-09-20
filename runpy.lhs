@@ -21,22 +21,18 @@ Da Code
 A lot of imports, but nothing too intense. Mostly, we want to create files,
 and write to `stderr`. The latter `System.IO`; the former `System.Director`.
 
+> import Text.Pandoc
+> import Text.Pandoc.Walk
 > import Data.Hashable (hash)
-> import System.IO
 > import System.Directory (removeFile)
 > import System.Process (readProcess)
-> import Text.Pandoc.JSON
 
-This is very simple. Basically, call `runPython` for its side-effect only,
-doing absolutely nothing to the AST.
-
-    NOTE TO SELF: I should have probably used the query feature instead. OH
-    WELL!
-
-> runpy :: Block -> IO Block
+> runpy :: Block -> IO [String]
 > runpy cb@(CodeBlock attr text)
->   | isPython attr = runPython text >> return cb
-> runpy x = return x
+>   | isPython attr = do
+>       output <- runPython text
+>       return [output]
+> runpy x = return []
 
 Python code has the class... `python`. Unsurprisingly.
 
@@ -46,17 +42,22 @@ Python code has the class... `python`. Unsurprisingly.
 
 This creates a file with the hashed name.
 
-> runPython :: String -> IO ()
+> runPython :: String -> IO String
 > runPython source = let
 >     name = (++".py") $ show $ hash source
 >   in do
 >       writeFile name source
 >       output <- readProcess "python" [name] []
->       hPutStr stderr output
 >       removeFile name
+>       return output
 
-Create an inline image. This will work both in HTML, LaTeX, and (probably)
-more!
+> readDoc :: String -> Pandoc
+> readDoc s = case readMarkdown def s of
+>                  Right doc -> doc
+>                  Left err  -> error (show err)
 
 > main :: IO ()
-> main = toJSONFilter runpy
+> main = do
+>   markdown <- getContents
+>   output <- query runpy (readDoc markdown)
+>   putStr $ unlines output
