@@ -28,10 +28,8 @@ and write to `stderr`. The latter `System.IO`; the former `System.Director`.
 > import Text.Pandoc.JSON
 
 This is very simple. Basically, call `runPython` for its side-effect only,
-doing absolutely nothing to the AST.
-
-    NOTE TO SELF: I should have probably used the query feature instead. OH
-    WELL!
+doing absolutely nothing to the AST. We can't use `walk` because its
+type-signature strangely forbids `IO a`.
 
 > runpy :: Block -> IO Block
 > runpy cb@(CodeBlock attr text)
@@ -54,9 +52,6 @@ This creates a file with the hashed name.
 >       output <- readProcess "python" [name] []
 >       hPutStr stderr output
 >       removeFile name
-
-Create an inline image. This will work both in HTML, LaTeX, and (probably)
-more!
 
 > main :: IO ()
 > main = toJSONFilter runpy
