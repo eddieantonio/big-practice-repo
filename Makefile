@@ -1,5 +1,5 @@
-BINS = unruly geewhiz
-#BINS = unruly shout fall_of_rome geewhiz runpy
+BINS = unruly geewhiz shout
+#BINS = unruly fall_of_rome geewhiz runpy
 
 all: $(BINS)
 
@@ -12,7 +12,7 @@ clean:
 	-$(RM) -- *.png
 	-$(RM) $(BINS)
 
-test: geewhiz
+test: shout
 	pandoc -F ./$< $<.lhs -o $<.html
 
 .PHONY: all test clean
