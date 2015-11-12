@@ -131,6 +131,8 @@ static void render_next(frame_t frame) {
     erase_last_line();
     sketchpad_color(from_hsv(deg_angle(angle), 1.0, 1.0));
     draw(line_coords(&center, rad_angle(angle)));
+
+    sketchpad_flush();
 }
 
 static void stahp(int signal) {
