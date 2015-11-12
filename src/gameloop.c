@@ -24,11 +24,27 @@ static volatile frame_t elapsed_frames = 0;
 
 /* Store the old sigaction. */
 static struct sigaction old_action;
+static sigset_t old_mask;
 
+static void block_signals() {
+    sigset_t all_signals;
+    sigfillset(&all_signals);
+
+    sigprocmask(SIG_BLOCK, &all_signals, &old_mask);
+}
+
+static void unblock_signals() {
+    sigprocmask(SIG_SETMASK, &old_mask, NULL);
+}
+
+/** Function that runs on SIGALRM. */
 static void gameloop(int signal) {
     assert(signal == SIGALRM);
+
+    block_signals();
     frame_function(elapsed_frames);
     elapsed_frames++;
+    unblock_signals();
 }
 
 static void init_gameloop(frame_function_t func) {
