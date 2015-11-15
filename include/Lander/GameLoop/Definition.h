@@ -5,6 +5,8 @@ namespace Lander {
 namespace GameLoop {
 
 typedef unsigned long FrameCounter;
+/* Forward Declaration. */
+class GameLoop;
 
 /**
  * Creates the defintion of a frame function.
@@ -12,7 +14,7 @@ typedef unsigned long FrameCounter;
 class Definition {
 public:
     virtual ~Definition() {};
-    virtual void eachFrame(FrameCounter frame) = 0;
+    virtual void eachFrame(GameLoop& loop, FrameCounter frame) = 0;
 };
 
 }

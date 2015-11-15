@@ -6,7 +6,9 @@
 
 #include "Lander/GameLoop/GameLoop.h"
 
+static void disable_gameloop();
 static void init_gameloop();
+
 static Lander::GameLoop::GameLoop *installed_loop = 0;
 
 namespace Lander {
@@ -46,6 +48,7 @@ GameLoop& GameLoop::start()
 
 GameLoop& GameLoop::stop()
 {
+    disable_gameloop();
     shouldContinue = false;
 
     return *this;
@@ -53,7 +56,7 @@ GameLoop& GameLoop::stop()
 
 FrameCounter GameLoop::doFrame()
 {
-    handler.eachFrame(elapsedFrames);
+    handler.eachFrame(*this, elapsedFrames);
     return elapsedFrames++;
 }
 
@@ -65,12 +68,8 @@ FrameCounter GameLoop::doFrame()
 static const suseconds_t ONE_SIXTIETH_OF_A_SECOND = 1000000 / 60;
 
 static const struct itimerval frame_timer = {
-    .it_interval = {
-        .tv_usec = ONE_SIXTIETH_OF_A_SECOND
-    },
-    .it_value = {
-        .tv_usec = ONE_SIXTIETH_OF_A_SECOND
-    }
+    { 0, ONE_SIXTIETH_OF_A_SECOND },
+    { 0, ONE_SIXTIETH_OF_A_SECOND },
 };
 
 /* Store the old sigaction. */
@@ -100,13 +99,19 @@ static void on_alarm(int sig_id)
 
 static void init_gameloop() {
     struct sigaction action = {
-        .sa_handler = on_alarm,
-        .sa_mask = 0,
-        .sa_flags = 0
+        { on_alarm }, 0, 0
     };
 
     /* Set signal handler. */
     sigaction(SIGALRM, &action, &old_action);
     /* Start the timer. */
     setitimer(ITIMER_REAL, &frame_timer, NULL);
+}
+
+static void disable_gameloop() {
+    struct itimerval null_timer = { { 0 }, { 0 } };
+
+    /* Cancel the timer. */
+    setitimer(ITIMER_REAL, &null_timer, NULL);
+    sigaction(SIGALRM, &old_action, NULL);
 }

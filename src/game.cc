@@ -11,8 +11,12 @@ public:
     Game(const Sketch::Sketch& sketchpad)
         : sketcher(sketchpad) { }
 
-    void eachFrame(GameLoop::FrameCounter frame)
+    void eachFrame(GameLoop::GameLoop &loop, GameLoop::FrameCounter frame)
     {
+        if (frame > 5 * 60) {
+            loop.stop();
+        }
+
         drawRandomLine();
     }
 
@@ -35,6 +39,7 @@ void startGame(const Sketch::Sketch& sketcher) {
     GameLoop::GameLoop loop(game);
 
     loop.start();
+    sketcher.end();
 }
 
 }
