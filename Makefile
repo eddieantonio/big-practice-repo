@@ -27,7 +27,7 @@ $(BIN): $(OBJS)
 
 # Generates object files in a seperate directory.
 build/%.o: src/%.cc
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ -c $^
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
 # Include dependencies from -d
 -include $(DEPS)
