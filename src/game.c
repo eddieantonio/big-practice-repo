@@ -20,24 +20,12 @@ static const coordinate SCREEN_CENTER = {
 static const double DURATION = 5.0L; // Seconds
 static const double LINE_LENGTH = 200; // pixels
 
-/* forward decls */
+/* Globals! */
 
-static void render_next(frame_t frames);
-static void stahp(int signal);
+static line line_storage = { { 0 }, { 0 } };
+static line* last_line = NULL;
 
-/* globals */
-
-line line_storage = { { 0 }, { 0 } };
-line* last_line = NULL;
-
-/* function defs */
-
-void start_game() {
-    /* STAHP when given SIGINT; we only need the signal handler once, since
-     * stahp() should exit gracefully. */
-    signal(SIGINT, stahp);
-    gameloop_start(render_next);
-}
+/* Functions! */
 
 static double progress(double frame) {
     return frame / (60 * DURATION);
@@ -113,6 +101,9 @@ static void erase_last_line() {
     }
 }
 
+/**
+ * Runs on each frame.
+ */
 static void render_next(frame_t frame) {
     double angle = progress(frame);
 
@@ -128,4 +119,11 @@ static void render_next(frame_t frame) {
 
 static void stahp(int signal) {
     gameloop_stop();
+}
+
+void start_game() {
+    /* STAHP when given SIGINT; we only need the signal handler once, since
+     * stahp() should exit gracefully. */
+    signal(SIGINT, stahp);
+    gameloop_start(render_next);
 }
