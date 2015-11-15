@@ -7,12 +7,12 @@
 #include "Sketch/Sketch.h"
 #include "Lander/Util/COutputBuffer.h"
 
+namespace Lander {
+void startGame(const Sketch::Sketch& sketcher);
+}
+
 static void do_it(const Sketch::Sketch& sketchpad) {
-    sketchpad
-        .color(0xFF00FF)
-        .drawLine(10, 10, 100, 100)
-        .pause(5)
-        .end();
+    Lander::startGame(sketchpad);
 }
 
 static int to_sketchpad() {
