@@ -9,7 +9,7 @@ VERSION=0.1.0
 CFLAGS = -std=c11 -Wall -pedantic
 CPPFLAGS = -MMD -I$(LOCAL_INCLUDE_DIR)
 LDFLAGS =
-LDLIBS = -lm
+LDLIBS = -lm -lcurses
 
 BIN = $(NAME)
 SRCS = $(wildcard src/*.c)

@@ -1,13 +1,14 @@
 #include <math.h>
 
 #include <signal.h>
+#include <curses.h>
 
 #include "gameloop.h"
 #include "game.h"
 #include "sketchpad.h"
 #include "line.h"
 
-/* constants. */
+/* Constants! */
 
 static const int SCREEN_WIDTH = 640;
 static const int SCREEN_HEIGHT = 480;
@@ -17,12 +18,13 @@ static const coordinate SCREEN_CENTER = {
     .y = SCREEN_HEIGHT / 2
 };
 
+/** Duration of the loop. */
 static const double DURATION = 5.0L; // Seconds
+/** Length of the line. */
 static const double LINE_LENGTH = 200; // pixels
 
 /* Globals! */
 
-static line line_storage = { { 0 }, { 0 } };
 static line* last_line = NULL;
 
 /* Functions! */
@@ -77,14 +79,17 @@ static color_t from_hsv(double hue, double saturation, double value) {
     return to_rgb((r + m) * 255, (g + m) * 255, (b + m) * 255);
 }
 
-static void draw(line line) {
-    line_storage = line;
+static void draw_line(line l) {
+    static line line_storage;
+
+    /* Copy the line and set the pointer. */
+    line_storage = l;
     last_line = &line_storage;
-    sketchpad_draw(line.start.x, line.start.y, line.end.x, line.end.y);
+    sketchpad_draw(l.start.x, l.start.y, l.end.x, l.end.y);
 }
 
-static void erase(line line) {
-    sketchpad_erase(line.start.x, line.start.y, line.end.x, line.end.y);
+static void erase_line(line l) {
+    sketchpad_erase(l.start.x, l.start.y, l.end.x, l.end.y);
 }
 
 static double rad_angle(double x) {
@@ -97,8 +102,18 @@ static double deg_angle(double x) {
 
 static void erase_last_line() {
     if (last_line != NULL) {
-        erase(*last_line);
+        erase_line(*last_line);
     }
+}
+
+static char get_input() {
+    return getch();
+}
+
+static void stahp(int signal) {
+    /* Ends curses. */
+    endwin();
+    gameloop_stop();
 }
 
 /**
@@ -107,23 +122,44 @@ static void erase_last_line() {
 static void render_next(frame_t frame) {
     double angle = progress(frame);
 
+    char in = get_input();
+    if (in == 'q') {
+        stahp(-1);
+    }
+
     coordinate center = SCREEN_CENTER;
     center.x += 100.0 * cos(rad_angle(progress(frame)));
 
     erase_last_line();
     sketchpad_color(from_hsv(deg_angle(angle), 1.0, 1.0));
-    draw(line_coords(&center, rad_angle(angle)));
+    draw_line(line_coords(&center, rad_angle(angle)));
 
     sketchpad_flush();
 }
 
-static void stahp(int signal) {
-    gameloop_stop();
+/** ncurses initialization. */
+static void init_curses() {
+    initscr();
+    /* Do not echo characters typed to the terminal. */
+    noecho();
+    /* Do not block. */
+    cbreak();
+
+    keypad(stdscr, true);
+    nodelay(stdscr, true);
+
+    move(12, 4);
+    printw("Welcome to lander!\n"
+           "    Left/right arrow kets for rotation\n"
+           "    Space for thrust.\n");
+    refresh();
 }
 
 void start_game() {
     /* STAHP when given SIGINT; we only need the signal handler once, since
      * stahp() should exit gracefully. */
     signal(SIGINT, stahp);
+    init_curses();
+
     gameloop_start(render_next);
 }
