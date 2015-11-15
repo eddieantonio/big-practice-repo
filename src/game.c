@@ -18,6 +18,7 @@ static const coordinate SCREEN_CENTER = {
     .y = SCREEN_HEIGHT / 2
 };
 
+
 /** Duration of the loop. */
 static const double DURATION = 5.0L; // Seconds
 /** Length of the line. */
@@ -26,6 +27,7 @@ static const double LINE_LENGTH = 200; // pixels
 /* Globals! */
 
 static line* last_line = NULL;
+static coordinate origin;
 
 /* Functions! */
 
@@ -106,15 +108,34 @@ static void erase_last_line() {
     }
 }
 
-static char get_input() {
-    return getch();
-}
-
 static void stahp(int signal) {
     /* Ends curses. */
     endwin();
     gameloop_stop();
 }
+
+static void handle_input() {
+    const double displacement = 10;
+    switch(getch()) {
+        case 'q':
+            /* QUIT */
+            stahp(-1);
+            break;
+        case KEY_LEFT:
+            origin.x -= displacement;
+            break;
+        case KEY_RIGHT:
+            origin.x += displacement;
+            break;
+        case KEY_UP:
+            origin.y -= displacement;
+            break;
+        case KEY_DOWN:
+            origin.y += displacement;
+            break;
+    }
+}
+
 
 /**
  * Runs on each frame.
@@ -122,12 +143,9 @@ static void stahp(int signal) {
 static void render_next(frame_t frame) {
     double angle = progress(frame);
 
-    char in = get_input();
-    if (in == 'q') {
-        stahp(-1);
-    }
+    handle_input();
 
-    coordinate center = SCREEN_CENTER;
+    coordinate center = origin;
     center.x += 100.0 * cos(rad_angle(progress(frame)));
 
     erase_last_line();
@@ -160,6 +178,7 @@ void start_game() {
      * stahp() should exit gracefully. */
     signal(SIGINT, stahp);
     init_curses();
+    origin = SCREEN_CENTER;
 
     gameloop_start(render_next);
 }
