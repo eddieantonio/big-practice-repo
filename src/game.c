@@ -5,23 +5,14 @@
 #include "gameloop.h"
 #include "game.h"
 #include "sketchpad.h"
-
-/* types. */
-
-struct point {
-    double x, y;
-};
-
-struct line {
-    struct point start, end;
-};
+#include "line.h"
 
 /* constants. */
 
 static const int SCREEN_WIDTH = 640;
 static const int SCREEN_HEIGHT = 480;
 
-static const struct point SCREEN_CENTER = {
+static const coordinate SCREEN_CENTER = {
     .x = SCREEN_WIDTH / 2,
     .y = SCREEN_HEIGHT / 2
 };
@@ -36,8 +27,8 @@ static void stahp(int signal);
 
 /* globals */
 
-struct line line_storage = { { 0 }, { 0 } };
-struct line* last_line = NULL;
+line line_storage = { { 0 }, { 0 } };
+line* last_line = NULL;
 
 /* function defs */
 
@@ -52,11 +43,11 @@ static double progress(double frame) {
     return frame / (60 * DURATION);
 }
 
-static struct line line_coords(const struct point *origin, double angle) {
+static line line_coords(const coordinate *origin, double angle) {
     double half_x_disp = cos(angle) * LINE_LENGTH / 2.0;
     double half_y_disp = sin(angle) * LINE_LENGTH / 2.0;
 
-    return (struct line) {
+    return (line) {
         .start = {
             .x = origin->x - half_x_disp,
             .y = origin->y - half_y_disp
@@ -98,13 +89,13 @@ static color_t from_hsv(double hue, double saturation, double value) {
     return to_rgb((r + m) * 255, (g + m) * 255, (b + m) * 255);
 }
 
-static void draw(struct line line) {
+static void draw(line line) {
     line_storage = line;
     last_line = &line_storage;
     sketchpad_draw(line.start.x, line.start.y, line.end.x, line.end.y);
 }
 
-static void erase(struct line line) {
+static void erase(line line) {
     sketchpad_erase(line.start.x, line.start.y, line.end.x, line.end.y);
 }
 
@@ -125,7 +116,7 @@ static void erase_last_line() {
 static void render_next(frame_t frame) {
     double angle = progress(frame);
 
-    struct point center = SCREEN_CENTER;
+    coordinate center = SCREEN_CENTER;
     center.x += 100.0 * cos(rad_angle(progress(frame)));
 
     erase_last_line();
