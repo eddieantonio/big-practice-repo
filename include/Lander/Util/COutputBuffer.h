@@ -23,6 +23,11 @@ protected:
                 return EOF;
             }
         }
+
+        if (c == '\n') {
+            fflush(c_stream);
+        }
+
         return c;
     }
 };
