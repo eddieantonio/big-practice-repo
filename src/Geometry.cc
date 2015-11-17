@@ -3,6 +3,8 @@
 
 #include "Lander/Geometry.h"
 
+//#include <iostream>
+
 namespace {
 
 const Lander::Point INVALID_POINT(
@@ -28,18 +30,11 @@ bool lineSegmentIntersection(
 ) {
     double  distAB, theCos, theSin, newX, ABpos ;
 
-    //  Fail if the segments share an end-point.
-    if ((Ax==Cx && Ay==Cy) || (Bx==Cx && By==Cy)
-            ||  (Ax==Dx && Ay==Dy) || (Bx==Dx && By==Dy)) {
-        return false; }
-
-    //  (1) Translate the system so that point A is on the origin.
-    Bx-=Ax; By-=Ay;
-    Cx-=Ax; Cy-=Ay;
-    Dx-=Ax; Dy-=Ay;
-
     //  Discover the length of segment A-B.
     distAB = sqrt(Bx * Bx + By * By);
+
+    //std::cerr << Ax << ',' << Ay << "=>" << Bx << ',' << By << std::endl;
+    //std::cerr << Cx << ',' << Cy << "=>" << Dx << ',' << Dy << std::endl;
 
     //  (2) Rotate the system so that point B is on the positive X axis.
     theCos = Bx / distAB;
@@ -112,14 +107,20 @@ Point Line::intersection(const Line& other) const
 {
     double x, y;
 
-    //  Fail if either line segment is zero-length.
+    // Fail if either line segment is zero-length.
     if (isZeroLength() || other.isZeroLength()) return INVALID_POINT;
 
+    // SKIPPED: Fail if the segments share an end-point.
+
+    //  (1) Translate the system so that point A is on the origin.
+    Line a = this->translate(-start);
+    Line b = other.translate(-start);
+
     bool didIntersect = lineSegmentIntersection(
-            this->start.x, this->start.y,
-            this->end.x, this->end.y,
-            other.start.x, other.start.y,
-            other.end.x, other.end.y,
+            a.start.x, a.start.y,
+            a.end.x, a.end.y,
+            b.start.x, b.start.y,
+            b.end.x, b.end.y,
             &x, &y
     );
 
