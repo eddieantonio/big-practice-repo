@@ -11,10 +11,7 @@ struct Point {
     Point(double x, double y) : x(x), y(y) { }
     double x, y;
 
-    /**
-     * @return whether the point is valid.
-     */
-    operator bool() const;
+    bool exists() const;
 
     /**
      * @return Point the mirror copy of this point flipped about y=-x.

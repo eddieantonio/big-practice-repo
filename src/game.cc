@@ -64,7 +64,7 @@ protected:
             stop();
         }
 
-        if (topLine.intersection(bottomLine)) {
+        if (topLine.intersection(bottomLine).exists()) {
             drawLine(topLine, RED);
             drawLine(bottomLine, RED);
             stop();

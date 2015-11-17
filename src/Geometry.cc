@@ -14,8 +14,11 @@ const Lander::Point INVALID_POINT(
 
 namespace Lander {
 
-/* Point utilities! */
-Point::operator bool() const
+/*
+ * Point utilities!
+ */
+
+bool Point::exists() const
 {
     return !(isnan(x) || isnan(y));
 }
@@ -61,7 +64,8 @@ Line Line::translate(const Point& origin) const
 Point Line::intersection(const Line& other) const
 {
     // Fail if either line segment is zero-length.
-    if (isZeroLength() || other.isZeroLength()) return INVALID_POINT;
+    if (isZeroLength() || other.isZeroLength())
+        return INVALID_POINT;
 
     // SKIPPED: Fail if the segments share an end-point.
 
@@ -69,31 +73,35 @@ Point Line::intersection(const Line& other) const
     Line ab = this->translate(-start);
     Line cd = other.translate(-start);
 
+    double &bᵪ = ab.end.x, &bᵧ = ab.end.y,
+           &cᵪ = cd.start.x, &cᵧ = cd.start.y,
+           &dᵪ = cd.end.x, &dᵧ = cd.end.y;
+
     // Discover the length of segment AB.
-    auto distanceAB = sqrt(ab.end.x * ab.end.x + ab.end.y * ab.end.y);
+    auto distanceAB = sqrt(bᵪ * bᵪ + bᵧ * bᵧ);
 
     //  (2) Rotate the system so that point B is on the positive X axis.
-    auto theCos = ab.end.x / distanceAB;
-    auto theSin = ab.end.y / distanceAB;
-    auto newCX = cd.start.x * theCos + cd.start.y * theSin;
-    cd.start.y = cd.start.y * theCos - cd.start.x * theSin;
-    cd.start.x = newCX;
-    auto newDX = cd.end.x * theCos + cd.end.y * theSin;
-    cd.end.y = cd.end.y * theCos - cd.end.x * theSin;
-    cd.end.x = newDX;
+    auto theCos = bᵪ / distanceAB;
+    auto theSin = bᵧ / distanceAB;
+    auto newCX = cᵪ * theCos + cᵧ * theSin;
+    cᵧ = cᵧ * theCos - cᵪ * theSin;
+    cᵪ = newCX;
+    auto newDX = dᵪ * theCos + dᵧ * theSin;
+    dᵧ = dᵧ * theCos - dᵪ * theSin;
+    dᵪ = newDX;
 
     // Fail if segment CD doesn't cross line AB.
     if (cd.below(0.0) || cd.above(0.0))
         return INVALID_POINT;
 
-    // (3) Discover the position of the intersection point along line A-B.
-    auto ABpos = cd.end.x + (cd.start.x - cd.end.x) * cd.end.y / (cd.end.y - cd.start.y);
+    // (3) Discover the position of the intersection point along line AB.
+    auto ABpos = dᵪ + (cᵪ - dᵪ) * dᵧ / (dᵧ - cᵧ);
 
-    // Fail if segment C-D crosses line A-B outside of segment A-B.
+    // Fail if segment CD crosses line AB outside of segment AB.
     if ((ABpos < 0.0) || (ABpos > distanceAB))
         return INVALID_POINT;
 
-    //  (4) Apply the discovered position to line A-B in the original coordinate system.
+    // (4) Apply the discovered position to line AB in the original coordinate system.
     return Point(
         start.x + ABpos * theCos,
         start.y + ABpos * theSin
