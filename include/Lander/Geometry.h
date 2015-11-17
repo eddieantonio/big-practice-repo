@@ -44,7 +44,11 @@ struct Line {
     Point intersection(const Line& other) const;
 
     /* Lots of utility functions! */
+
     bool isZeroLength() const;
+
+    bool below(double y) const;
+    bool above(double y) const;
 
     Line translate(const Point& origin) const;
 };

@@ -3,66 +3,12 @@
 
 #include "Lander/Geometry.h"
 
-//#include <iostream>
-
 namespace {
 
 const Lander::Point INVALID_POINT(
         std::numeric_limits<double>::quiet_NaN(),
         std::numeric_limits<double>::quiet_NaN()
 );
-
-/**
- * Based on a:
- * public domain function by Darel Rex Finley, 2006
- * Determines the intersection point of the line segment defined by points A and B
- * with the line segment defined by points C and D.
- *
- * @return a Point if the intersection point was found.
- * Returns an invalid Point if there is no determinable intersection point.
- */
-bool lineSegmentIntersection(
-    double Ax, double Ay,
-    double Bx, double By,
-    double Cx, double Cy,
-    double Dx, double Dy,
-    double *X, double *Y
-) {
-    double  distAB, theCos, theSin, newX, ABpos ;
-
-    //  Discover the length of segment A-B.
-    distAB = sqrt(Bx * Bx + By * By);
-
-    //std::cerr << Ax << ',' << Ay << "=>" << Bx << ',' << By << std::endl;
-    //std::cerr << Cx << ',' << Cy << "=>" << Dx << ',' << Dy << std::endl;
-
-    //  (2) Rotate the system so that point B is on the positive X axis.
-    theCos = Bx / distAB;
-    theSin = By / distAB;
-    newX = Cx * theCos + Cy * theSin;
-    Cy = Cy * theCos - Cx * theSin;
-    Cx = newX;
-    newX = Dx * theCos + Dy * theSin;
-    Dy = Dy * theCos - Dx * theSin;
-    Dx = newX;
-
-    //  Fail if segment C-D doesn't cross line A-B.
-    if ((Cy < 0.0 && Dy < 0.0) || (Cy >= 0.0 && Dy >= 0.0))
-        return false;
-
-    //  (3) Discover the position of the intersection point along line A-B.
-    ABpos=Dx+(Cx-Dx)*Dy/(Dy-Cy);
-
-    //  Fail if segment C-D crosses line A-B outside of segment A-B.
-    if ((ABpos < 0.0) || (ABpos > distAB)) return false;
-
-    //  (4) Apply the discovered position to line A-B in the original coordinate system.
-    *X=Ax+ABpos*theCos;
-    *Y=Ay+ABpos*theSin;
-
-    //  Success.
-    return true;
-}
 
 }
 
@@ -103,37 +49,71 @@ Line Line::translate(const Point& origin) const
     return Line(start + origin, end + origin);
 }
 
+/**
+ * Based on a:
+ * public domain function by Darel Rex Finley, 2006
+ * Determines the intersection point of the line segment defined by points A and B
+ * with the line segment defined by points C and D.
+ *
+ * @return a Point if the intersection point was found.
+ * Returns an invalid Point if there is no determinable intersection point.
+ */
 Point Line::intersection(const Line& other) const
 {
-    double x, y;
-
     // Fail if either line segment is zero-length.
     if (isZeroLength() || other.isZeroLength()) return INVALID_POINT;
 
     // SKIPPED: Fail if the segments share an end-point.
 
     //  (1) Translate the system so that point A is on the origin.
-    Line a = this->translate(-start);
-    Line b = other.translate(-start);
+    Line ab = this->translate(-start);
+    Line cd = other.translate(-start);
 
-    bool didIntersect = lineSegmentIntersection(
-            a.start.x, a.start.y,
-            a.end.x, a.end.y,
-            b.start.x, b.start.y,
-            b.end.x, b.end.y,
-            &x, &y
-    );
+    // Discover the length of segment AB.
+    auto distanceAB = sqrt(ab.end.x * ab.end.x + ab.end.y * ab.end.y);
 
-    if (didIntersect) {
-        return Point(x, y);
-    } else {
+    //  (2) Rotate the system so that point B is on the positive X axis.
+    auto theCos = ab.end.x / distanceAB;
+    auto theSin = ab.end.y / distanceAB;
+    auto newCX = cd.start.x * theCos + cd.start.y * theSin;
+    cd.start.y = cd.start.y * theCos - cd.start.x * theSin;
+    cd.start.x = newCX;
+    auto newDX = cd.end.x * theCos + cd.end.y * theSin;
+    cd.end.y = cd.end.y * theCos - cd.end.x * theSin;
+    cd.end.x = newDX;
+
+    // Fail if segment CD doesn't cross line AB.
+    if (cd.below(0.0) || cd.above(0.0))
         return INVALID_POINT;
-    }
+
+    // (3) Discover the position of the intersection point along line A-B.
+    auto ABpos = cd.end.x + (cd.start.x - cd.end.x) * cd.end.y / (cd.end.y - cd.start.y);
+
+    // Fail if segment C-D crosses line A-B outside of segment A-B.
+    if ((ABpos < 0.0) || (ABpos > distanceAB))
+        return INVALID_POINT;
+
+    //  (4) Apply the discovered position to line A-B in the original coordinate system.
+    return Point(
+        start.x + ABpos * theCos,
+        start.y + ABpos * theSin
+    );
 }
 
 bool Line::isZeroLength() const
 {
     return start == end;
+}
+
+
+bool Line::below(double y) const
+{
+    return start.y < y && end.y < y;
+}
+
+bool Line::above(double y) const
+{
+    return start.y > y && end.y > y;
 }
 
 }
