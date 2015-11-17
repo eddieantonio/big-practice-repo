@@ -1,10 +1,11 @@
 #include <cstdlib>
+#include <iostream>
 
 #include "Sketch/Sketch.h"
+#include "Signal/Signal.h"
 
 #include "Lander/GameLoop/Definition.h"
 #include "Lander/GameLoop/GameLoop.h"
-
 #include "Lander/Geometry.h"
 
 namespace {
@@ -19,9 +20,25 @@ const double DISTANCE_APART = 10;
 const double TOP = CENTER - DISTANCE_APART / 2;
 const double BOTTOM = CENTER + DISTANCE_APART /2;
 
+using Lander::GameLoop::GameLoop;
+
+/**
+ * A lot of pomp & circumstance just to stop the gameloop.
+ */
+class SigIntHandler : public Signal::SignalAction {
+    GameLoop& gameLoop;
+public:
+    SigIntHandler(GameLoop& loop) : gameLoop(loop) { }
+    virtual void handle(int signal)
+    {
+        gameLoop.stop();
+    }
+};
+
 }
 
 namespace Lander {
+
 
 class Game : public Lander::GameLoop::Definition {
 public:
@@ -86,6 +103,8 @@ protected:
 void startGame(const Sketch::Sketch& sketcher) {
     Game game(sketcher);
     GameLoop::GameLoop loop(game);
+    SigIntHandler stopOnSignal(loop);
+    Signal::Signal sigint(SIGINT, stopOnSignal);
 
     loop.start();
     sketcher.end();

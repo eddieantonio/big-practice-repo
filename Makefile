@@ -12,9 +12,9 @@ LDFLAGS =
 LDLIBS = -lm -lcurses
 
 BIN = $(NAME)
-SRCS = $(wildcard src/*.cc)
+SRCS := $(shell find src -name *.cc)
 OBJS = $(patsubst src/%.cc,build/%.o,$(SRCS))
-DEPS := $(patsubst src/%.cc,build/%.d,$(SRCS))
+DEPS = $(patsubst src/%.cc,build/%.d,$(SRCS))
 
 DISTNAME = $(NAME)-$(VERSION)
 
