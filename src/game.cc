@@ -1,36 +1,90 @@
 #include <cstdlib>
 
 #include "Sketch/Sketch.h"
+
 #include "Lander/GameLoop/Definition.h"
 #include "Lander/GameLoop/GameLoop.h"
+
+#include "Lander/Geometry.h"
+
+namespace {
+
+const Sketch::RGB RED = 0xFF0000;
+const Sketch::RGB BLACK = 0x000000;
+const Sketch::RGB ACCENT_1 = 0xAABA62;
+const Sketch::RGB ACCENT_2 = 0x70588C;
+
+const double CENTER = 480 / 2;
+const double DISTANCE_APART = 40;
+const double TOP = CENTER - DISTANCE_APART / 2;
+const double BOTTOM = CENTER + DISTANCE_APART /2;
+
+}
 
 namespace Lander {
 
 class Game : public Lander::GameLoop::Definition {
 public:
     Game(const Sketch::Sketch& sketchpad)
-        : sketcher(sketchpad) { }
+        : sketcher(sketchpad),
+          topLine(Point(10, TOP), Point(630, TOP)),
+          bottomLine(Point(10, BOTTOM), Point(630, BOTTOM))
+    { }
 
     void eachFrame(GameLoop::GameLoop &loop, GameLoop::FrameCounter frame)
     {
-        if (frame > 5 * 60) {
-            loop.stop();
-        }
+        this->loop = &loop;
 
-        drawRandomLine();
+        if ((frame % 15) == 0) {
+            doTheStuff();
+        }
     }
 
 protected:
     const Sketch::Sketch &sketcher;
+    GameLoop::GameLoop *loop;
+    Line topLine, bottomLine;
 
-    void drawRandomLine() {
-        sketcher
-            .color(rand() % 0x1000000)
-            .drawLine(
-                    rand() % 640,
-                    rand() % 480,
-                    rand() % 640,
-                    rand() % 480);
+    void stop()
+    {
+        loop->stop();
+        sketcher.pause(5);
+    }
+
+    void doTheStuff()
+    {
+        eraseLine(topLine);
+        eraseLine(bottomLine);
+
+        topLine.start.y += 1;
+        bottomLine.start.y -= 1;
+
+        topLine.end.y += 1;
+        bottomLine.end.y -= 1;
+
+        drawLine(topLine, ACCENT_1);
+        drawLine(bottomLine, ACCENT_2);
+
+        if (topLine.end.y > bottomLine.start.y) {
+            stop();
+        }
+
+        if (topLine.intersection(bottomLine)) {
+            drawLine(topLine, RED);
+            drawLine(bottomLine, RED);
+            stop();
+        }
+    }
+
+    void drawLine(Line& l, Sketch::RGB color=BLACK) const
+    {
+        sketcher.color(color);
+        sketcher.drawLine(l.start.x, l.start.y, l.end.x, l.end.y);
+    }
+
+    void eraseLine(Line& l) const
+    {
+        sketcher.eraseLine(l.start.x, l.start.y, l.end.x, l.end.y);
     }
 };
 

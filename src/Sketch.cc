@@ -25,7 +25,7 @@ const Sketch& Sketch::drawLine(double x1, double y1, double x2, double y2) const
 const Sketch& Sketch::eraseLine(double x1, double y1, double x2, double y2) const
 {
     process
-        << "eraseLine "
+        << "eraseSegment "
         << lround(x1) << ' '
         << lround(y1) << ' '
         << lround(x2) << ' '
