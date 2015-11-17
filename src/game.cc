@@ -15,7 +15,7 @@ const Sketch::RGB ACCENT_1 = 0xAABA62;
 const Sketch::RGB ACCENT_2 = 0x70588C;
 
 const double CENTER = 480 / 2;
-const double DISTANCE_APART = 40;
+const double DISTANCE_APART = 10;
 const double TOP = CENTER - DISTANCE_APART / 2;
 const double BOTTOM = CENTER + DISTANCE_APART /2;
 
@@ -35,9 +35,7 @@ public:
     {
         this->loop = &loop;
 
-        if ((frame % 15) == 0) {
-            doTheStuff();
-        }
+        doTheStuff();
     }
 
 protected:
@@ -56,11 +54,8 @@ protected:
         eraseLine(topLine);
         eraseLine(bottomLine);
 
-        topLine.start.y += 1;
-        bottomLine.start.y -= 1;
-
-        topLine.end.y += 1;
-        bottomLine.end.y -= 1;
+        topLine.start.y += 1.0/60.0;
+        bottomLine.start.y -= 1.0/60.0;
 
         drawLine(topLine, ACCENT_1);
         drawLine(bottomLine, ACCENT_2);

@@ -15,6 +15,22 @@ struct Point {
      * @return whether the point is valid.
      */
     operator bool() const;
+
+    /**
+     * @return Point the mirror copy of this point flipped about y=-x.
+     */
+    Point operator -() const;
+
+    bool operator==(const Point&) const;
+
+    /**
+     * @return Point pair-wise addition of the points.
+     */
+    Point operator+(const Point& other) const;
+    /**
+     * @return Point pair-wise subtraction of the points.
+     */
+    Point operator-(const Point& other) const;
 };
 
 /**
@@ -25,7 +41,12 @@ struct Line {
     Line(Point a, Point b) : start(a), end(b) { }
     Point start, end;
 
-    Point intersection(Line other) const;
+    Point intersection(const Line& other) const;
+
+    /* Lots of utility functions! */
+    bool isZeroLength() const;
+
+    Line translate(const Point& origin) const;
 };
 
 }

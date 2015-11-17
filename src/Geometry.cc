@@ -26,11 +26,7 @@ bool lineSegmentIntersection(
     double Dx, double Dy,
     double *X, double *Y
 ) {
-
     double  distAB, theCos, theSin, newX, ABpos ;
-
-    //  Fail if either line segment is zero-length.
-    if ((Ax==Bx && Ay==By) || (Cx==Dx && Cy==Dy)) return false;
 
     //  Fail if the segments share an end-point.
     if ((Ax==Cx && Ay==Cy) || (Bx==Cx && By==Cy)
@@ -43,15 +39,17 @@ bool lineSegmentIntersection(
     Dx-=Ax; Dy-=Ay;
 
     //  Discover the length of segment A-B.
-    distAB=sqrt(Bx*Bx+By*By);
+    distAB = sqrt(Bx * Bx + By * By);
 
     //  (2) Rotate the system so that point B is on the positive X axis.
-    theCos=Bx/distAB;
-    theSin=By/distAB;
-    newX=Cx*theCos+Cy*theSin;
-    Cy  =Cy*theCos-Cx*theSin; Cx=newX;
-    newX=Dx*theCos+Dy*theSin;
-    Dy  =Dy*theCos-Dx*theSin; Dx=newX;
+    theCos = Bx / distAB;
+    theSin = By / distAB;
+    newX = Cx * theCos + Cy * theSin;
+    Cy = Cy * theCos - Cx * theSin;
+    Cx = newX;
+    newX = Dx * theCos + Dy * theSin;
+    Dy = Dy * theCos - Dx * theSin;
+    Dx = newX;
 
     //  Fail if segment C-D doesn't cross line A-B.
     if ((Cy < 0.0 && Dy < 0.0) || (Cy >= 0.0 && Dy >= 0.0))
@@ -75,14 +73,48 @@ bool lineSegmentIntersection(
 
 namespace Lander {
 
+/* Point utilities! */
 Point::operator bool() const
 {
     return !(isnan(x) || isnan(y));
 }
 
-Point Line::intersection(Line other) const
+Point Point::operator-() const
+{
+    return Point(-x, -y);
+}
+
+Point Point::operator+(const Point& other) const
+{
+    return Point(x + other.x, y + other.y);
+}
+
+Point Point::operator-(const Point& other) const
+{
+    return *this + -other;
+}
+
+bool Point::operator==(const Point& other) const
+{
+    return x == other.x && y == other.y;
+}
+
+/*
+ * Line utilities!
+ */
+
+Line Line::translate(const Point& origin) const
+{
+    return Line(start + origin, end + origin);
+}
+
+Point Line::intersection(const Line& other) const
 {
     double x, y;
+
+    //  Fail if either line segment is zero-length.
+    if (isZeroLength() || other.isZeroLength()) return INVALID_POINT;
+
     bool didIntersect = lineSegmentIntersection(
             this->start.x, this->start.y,
             this->end.x, this->end.y,
@@ -96,6 +128,11 @@ Point Line::intersection(Line other) const
     } else {
         return INVALID_POINT;
     }
+}
+
+bool Line::isZeroLength() const
+{
+    return start == end;
 }
 
 }
