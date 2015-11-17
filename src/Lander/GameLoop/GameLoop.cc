@@ -4,12 +4,62 @@
 #include <signal.h>
 #include <sys/time.h>
 
+#include "Signal/Signal.h"
+
 #include "Lander/GameLoop/GameLoop.h"
 
-static void disable_gameloop();
-static void init_gameloop();
+namespace {
 
-static Lander::GameLoop::GameLoop *installed_loop = 0;
+Lander::GameLoop::GameLoop *installed_loop = 0;
+
+/* Unix/C stuff below: */
+
+static const suseconds_t ONE_SIXTIETH_OF_A_SECOND = 1000000 / 60;
+
+static const struct itimerval frame_timer = {
+    { 0, ONE_SIXTIETH_OF_A_SECOND },
+    { 0, ONE_SIXTIETH_OF_A_SECOND },
+};
+
+/* Store the old sigaction. */
+static sigset_t old_mask;
+
+static void block_signals() {
+    sigset_t all_signals;
+    sigfillset(&all_signals);
+
+    sigprocmask(SIG_BLOCK, &all_signals, &old_mask);
+}
+
+static void unblock_signals() {
+    sigprocmask(SIG_SETMASK, &old_mask, NULL);
+}
+
+class AlarmHandler : public Signal::SignalAction
+{
+    virtual void handle(int signal)
+    {
+        assert(signal == SIGALRM);
+        assert(installed_loop != 0);
+
+        block_signals();
+        installed_loop->doFrame();
+        unblock_signals();
+    }
+};
+
+void start_alarm() {
+    /* Start the timer. */
+    setitimer(ITIMER_REAL, &frame_timer, NULL);
+}
+
+void stop_alarm() {
+    /* Cancel the timer. */
+    struct itimerval null_timer = { { 0 }, { 0 } };
+    setitimer(ITIMER_REAL, &null_timer, NULL);
+}
+
+}
 
 namespace Lander {
 namespace GameLoop {
@@ -36,9 +86,12 @@ GameLoop::~GameLoop()
 
 GameLoop& GameLoop::start()
 {
-    init_gameloop();
-
     shouldContinue = true;
+
+    AlarmHandler onAlarm;
+    Signal::Signal handleAlarm(SIGALRM, onAlarm);
+    start_alarm();
+
     while (shouldContinue) {
         pause();
     }
@@ -48,7 +101,7 @@ GameLoop& GameLoop::start()
 
 GameLoop& GameLoop::stop()
 {
-    disable_gameloop();
+    stop_alarm();
     shouldContinue = false;
 
     return *this;
@@ -63,55 +116,3 @@ FrameCounter GameLoop::doFrame()
 }
 }
 
-/* Unix/C stuff below: */
-
-static const suseconds_t ONE_SIXTIETH_OF_A_SECOND = 1000000 / 60;
-
-static const struct itimerval frame_timer = {
-    { 0, ONE_SIXTIETH_OF_A_SECOND },
-    { 0, ONE_SIXTIETH_OF_A_SECOND },
-};
-
-/* Store the old sigaction. */
-static struct sigaction old_action;
-static sigset_t old_mask;
-
-static void block_signals() {
-    sigset_t all_signals;
-    sigfillset(&all_signals);
-
-    sigprocmask(SIG_BLOCK, &all_signals, &old_mask);
-}
-
-static void unblock_signals() {
-    sigprocmask(SIG_SETMASK, &old_mask, NULL);
-}
-
-static void on_alarm(int sig_id)
-{
-    assert(sig_id == SIGALRM);
-    assert(installed_loop != 0);
-
-    block_signals();
-    installed_loop->doFrame();
-    unblock_signals();
-}
-
-static void init_gameloop() {
-    struct sigaction action = {
-        { on_alarm }, 0, 0
-    };
-
-    /* Set signal handler. */
-    sigaction(SIGALRM, &action, &old_action);
-    /* Start the timer. */
-    setitimer(ITIMER_REAL, &frame_timer, NULL);
-}
-
-static void disable_gameloop() {
-    struct itimerval null_timer = { { 0 }, { 0 } };
-
-    /* Cancel the timer. */
-    setitimer(ITIMER_REAL, &null_timer, NULL);
-    sigaction(SIGALRM, &old_action, NULL);
-}
