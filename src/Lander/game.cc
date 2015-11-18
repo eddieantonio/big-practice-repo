@@ -11,7 +11,6 @@
 namespace {
 
 const Sketch::RGB RED = 0xFF0000;
-const Sketch::RGB BLACK = 0x000000;
 const Sketch::RGB ACCENT_1 = 0xAABA62;
 const Sketch::RGB ACCENT_2 = 0x70588C;
 
@@ -35,6 +34,24 @@ public:
     }
 };
 
+const Sketch::Sketch& operator <<(const Sketch::Sketch& sketcher, Sketch::RGB color)
+{
+    sketcher.color(color);
+    return sketcher;
+}
+
+const Sketch::Sketch& operator <<(const Sketch::Sketch& sketcher, const Lander::Line& l)
+{
+    sketcher.drawLine(l.start.x, l.start.y, l.end.x, l.end.y);
+    return sketcher;
+}
+
+const Sketch::Sketch& operator >>(const Sketch::Sketch& sketcher, const Lander::Line& l)
+{
+    sketcher.eraseLine(l.start.x, l.start.y, l.end.x, l.end.y);
+    return sketcher;
+}
+
 }
 
 namespace Lander {
@@ -52,7 +69,23 @@ public:
     {
         this->loop = &loop;
 
-        doTheStuff();
+        sketcher >> topLine >> bottomLine;
+
+        topLine.start.y += 1.0/60.0;
+        bottomLine.start.y -= 1.0/60.0;
+
+        sketcher
+            << ACCENT_1 << topLine
+            << ACCENT_2 << bottomLine;
+
+        if (topLine.end.y > bottomLine.start.y) {
+            stop(loop);
+        }
+
+        if (topLine.intersection(bottomLine).exists()) {
+            sketcher << RED << topLine << bottomLine;
+            stop(loop);
+        }
     }
 
 protected:
@@ -60,43 +93,10 @@ protected:
     GameLoop::GameLoop *loop;
     Line topLine, bottomLine;
 
-    void stop()
+    void stop(GameLoop::GameLoop& loop)
     {
-        loop->stop();
+        loop.stop();
         sketcher.pause(5);
-    }
-
-    void doTheStuff()
-    {
-        eraseLine(topLine);
-        eraseLine(bottomLine);
-
-        topLine.start.y += 1.0/60.0;
-        bottomLine.start.y -= 1.0/60.0;
-
-        drawLine(topLine, ACCENT_1);
-        drawLine(bottomLine, ACCENT_2);
-
-        if (topLine.end.y > bottomLine.start.y) {
-            stop();
-        }
-
-        if (topLine.intersection(bottomLine).exists()) {
-            drawLine(topLine, RED);
-            drawLine(bottomLine, RED);
-            stop();
-        }
-    }
-
-    void drawLine(Line& l, Sketch::RGB color=BLACK) const
-    {
-        sketcher.color(color);
-        sketcher.drawLine(l.start.x, l.start.y, l.end.x, l.end.y);
-    }
-
-    void eraseLine(Line& l) const
-    {
-        sketcher.eraseLine(l.start.x, l.start.y, l.end.x, l.end.y);
     }
 };
 
