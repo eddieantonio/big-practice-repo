@@ -2,40 +2,34 @@
 #include <cstdlib>
 
 #include <signal.h>
-#include <sys/time.h>
 
 #include "Signal/Signal.h"
+#include "Signal/Mask.h"
 
 #include "Lander/GameLoop/GameLoop.h"
 
 namespace {
 
-Lander::GameLoop::GameLoop *installed_loop = 0;
+using Signal::Mask::Manner::Replace;
 
-/* Store the old sigaction. */
-static sigset_t old_mask;
+Lander::GameLoop::GameLoop *installedLoop = 0;
 
-static void block_signals() {
-    sigset_t all_signals;
-    sigfillset(&all_signals);
-
-    sigprocmask(SIG_BLOCK, &all_signals, &old_mask);
-}
-
-static void unblock_signals() {
-    sigprocmask(SIG_SETMASK, &old_mask, NULL);
+sigset_t allSignals()
+{
+    sigset_t mask;
+    sigfillset(&mask);
+    return mask;
 }
 
 class AlarmHandler : public Signal::SignalAction
 {
-    virtual void handle(int signal)
+    virtual void handle(int signalID)
     {
-        assert(signal == SIGALRM);
-        assert(installed_loop != 0);
+        assert(signalID == SIGALRM);
+        assert(installedLoop != 0);
 
-        block_signals();
-        installed_loop->doFrame();
-        unblock_signals();
+        Signal::Mask blockAll(Replace, allSignals());
+        installedLoop->doFrame();
     }
 };
 
@@ -44,24 +38,23 @@ class AlarmHandler : public Signal::SignalAction
 namespace Lander {
 namespace GameLoop {
 
-
 GameLoop::GameLoop(Definition& def)
     : handler(def), shouldContinue(false), elapsedFrames(0), alarm(1.0 / 60)
 {
-    if (installed_loop != 0) {
+    if (installedLoop != 0) {
         /* Should not have constructed twice! */
         abort();
     }
 
-    installed_loop = this;
+    installedLoop = this;
 }
 
 GameLoop::~GameLoop()
 {
     stop();
 
-    assert(installed_loop == this);
-    installed_loop = 0;
+    assert(installedLoop == this);
+    installedLoop = 0;
 }
 
 GameLoop& GameLoop::start()
