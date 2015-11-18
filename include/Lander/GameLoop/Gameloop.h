@@ -17,9 +17,12 @@ public:
     GameLoop& start();
     GameLoop& stop();
 
+    FrameCounter &frameNo();
     FrameCounter doFrame();
 
+
 protected:
+
     Definition& handler;
     volatile bool shouldContinue;
     FrameCounter elapsedFrames;

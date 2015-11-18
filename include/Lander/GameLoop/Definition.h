@@ -14,7 +14,7 @@ class GameLoop;
 class Definition {
 public:
     virtual ~Definition() {};
-    virtual void eachFrame(GameLoop& loop, FrameCounter frame) = 0;
+    virtual void eachFrame(GameLoop& loop) = 0;
 };
 
 }

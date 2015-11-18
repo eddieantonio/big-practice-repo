@@ -11,8 +11,7 @@
 namespace {
 
 using Signal::Mask::Manner::Replace;
-
-Lander::GameLoop::GameLoop *installedLoop = 0;
+using Lander::GameLoop::GameLoop;
 
 sigset_t allSignals()
 {
@@ -23,14 +22,18 @@ sigset_t allSignals()
 
 class AlarmHandler : public Signal::SignalAction
 {
+public:
+    AlarmHandler(GameLoop& loop) : loop(loop) { }
+
     virtual void handle(int signalID)
     {
         assert(signalID == SIGALRM);
-        assert(installedLoop != 0);
 
         Signal::Mask blockAll(Replace, allSignals());
-        installedLoop->doFrame();
+        loop.doFrame();
     }
+private:
+    GameLoop& loop;
 };
 
 }
@@ -41,27 +44,18 @@ namespace GameLoop {
 GameLoop::GameLoop(Definition& def)
     : handler(def), shouldContinue(false), elapsedFrames(0), alarm(1.0 / 60)
 {
-    if (installedLoop != 0) {
-        /* Should not have constructed twice! */
-        abort();
-    }
-
-    installedLoop = this;
 }
 
 GameLoop::~GameLoop()
 {
     stop();
-
-    assert(installedLoop == this);
-    installedLoop = 0;
 }
 
 GameLoop& GameLoop::start()
 {
     shouldContinue = true;
 
-    AlarmHandler onAlarm;
+    AlarmHandler onAlarm(*this);
     Signal::Signal handleAlarm(SIGALRM, onAlarm);
     alarm.start();
 
@@ -82,7 +76,7 @@ GameLoop& GameLoop::stop()
 
 FrameCounter GameLoop::doFrame()
 {
-    handler.eachFrame(*this, elapsedFrames);
+    handler.eachFrame(*this);
     return elapsedFrames++;
 }
 

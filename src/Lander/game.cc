@@ -48,7 +48,7 @@ public:
           bottomLine(Point(10, BOTTOM), Point(630, BOTTOM))
     { }
 
-    void eachFrame(GameLoop::GameLoop &loop, GameLoop::FrameCounter frame)
+    void eachFrame(GameLoop::GameLoop &loop)
     {
         this->loop = &loop;
 
