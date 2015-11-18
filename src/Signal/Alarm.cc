@@ -5,9 +5,6 @@
 
 namespace Signal {
 
-Alarm::Alarm()
-    : Alarm(1.0) { }
-
 Alarm::Alarm(double seconds)
     : Alarm(
             (time_t) seconds,
@@ -17,8 +14,16 @@ Alarm::Alarm(double seconds)
 Alarm::Alarm(time_t secs, μtime msecs)
     : started(false), seconds(secs), microseconds(msecs) { }
 
+Alarm::~Alarm()
+{
+    stop();
+}
+
 Alarm& Alarm::start()
 {
+    if (started)
+        return *this;
+
     struct itimerval timer = {
         { seconds, static_cast<suseconds_t>(microseconds)  },
         { seconds, static_cast<suseconds_t>(microseconds)  },
@@ -33,6 +38,9 @@ Alarm& Alarm::start()
 
 Alarm& Alarm::stop()
 {
+    if (!started)
+        return *this;
+
     /* Cancel the timer. */
     setitimer(ITIMER_REAL, &oldTimer, NULL);
     started = false;

@@ -9,9 +9,9 @@ namespace Signal {
 class Alarm {
     typedef unsigned long μtime;
 public:
-    Alarm();
     Alarm(double seconds);
     Alarm(time_t secs, μtime msecs);
+    ~Alarm();
 
     Alarm& start();
     Alarm& stop();
