@@ -1,6 +1,7 @@
 #ifndef LANDER_GAMELOOP_GAMELOOP_H
 #define LANDER_GAMELOOP_GAMELOOP_H
 
+#include "Signal/Alarm.h"
 #include "Lander/GameLoop/Definition.h"
 
 namespace Lander {
@@ -22,6 +23,7 @@ protected:
     Definition& handler;
     volatile bool shouldContinue;
     FrameCounter elapsedFrames;
+    Signal::Alarm alarm;
 };
 
 }

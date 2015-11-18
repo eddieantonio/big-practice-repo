@@ -12,15 +12,6 @@ namespace {
 
 Lander::GameLoop::GameLoop *installed_loop = 0;
 
-/* Unix/C stuff below: */
-
-static const suseconds_t ONE_SIXTIETH_OF_A_SECOND = 1000000 / 60;
-
-static const struct itimerval frame_timer = {
-    { 0, ONE_SIXTIETH_OF_A_SECOND },
-    { 0, ONE_SIXTIETH_OF_A_SECOND },
-};
-
 /* Store the old sigaction. */
 static sigset_t old_mask;
 
@@ -48,17 +39,6 @@ class AlarmHandler : public Signal::SignalAction
     }
 };
 
-void start_alarm() {
-    /* Start the timer. */
-    setitimer(ITIMER_REAL, &frame_timer, NULL);
-}
-
-void stop_alarm() {
-    /* Cancel the timer. */
-    struct itimerval null_timer = { { 0 }, { 0 } };
-    setitimer(ITIMER_REAL, &null_timer, NULL);
-}
-
 }
 
 namespace Lander {
@@ -66,7 +46,7 @@ namespace GameLoop {
 
 
 GameLoop::GameLoop(Definition& def)
-    : handler(def), shouldContinue(false), elapsedFrames(0)
+    : handler(def), shouldContinue(false), elapsedFrames(0), alarm(1.0 / 60)
 {
     if (installed_loop != 0) {
         /* Should not have constructed twice! */
@@ -90,7 +70,7 @@ GameLoop& GameLoop::start()
 
     AlarmHandler onAlarm;
     Signal::Signal handleAlarm(SIGALRM, onAlarm);
-    start_alarm();
+    alarm.start();
 
     while (shouldContinue) {
         pause();
@@ -101,7 +81,7 @@ GameLoop& GameLoop::start()
 
 GameLoop& GameLoop::stop()
 {
-    stop_alarm();
+    alarm.stop();
     shouldContinue = false;
 
     return *this;
@@ -115,4 +95,3 @@ FrameCounter GameLoop::doFrame()
 
 }
 }
-
