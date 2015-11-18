@@ -9,7 +9,7 @@ Mask::Mask(Manner how, sigset_t set)
 
 Mask::~Mask()
 {
-    sigprocmask(SIG_SETMASK, &oldSet, 0);
+    sigprocmask(SIG_SETMASK, &oldSet, nullptr);
 }
 
 }

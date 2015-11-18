@@ -6,6 +6,9 @@
 
 namespace {
 
+/**
+ * An entry for each signal.
+ */
 Signal::SignalAction* signals[SIGUSR2 + 1];
 
 void globalHandler(int signal, siginfo_t *info, void *data)
@@ -35,8 +38,8 @@ Signal::Signal(int type, SignalAction& handler)
 Signal::~Signal()
 {
     /* Uninstall signal handler. */
-    sigaction(registeredSignal, &oldAction, NULL);
-    signals[registeredSignal] = 0;
+    sigaction(registeredSignal, &oldAction, nullptr);
+    signals[registeredSignal] = nullptr;
 }
 
 }

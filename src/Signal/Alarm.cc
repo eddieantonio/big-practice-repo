@@ -42,7 +42,7 @@ Alarm& Alarm::stop()
         return *this;
 
     /* Cancel the timer. */
-    setitimer(ITIMER_REAL, &oldTimer, NULL);
+    setitimer(ITIMER_REAL, &oldTimer, nullptr);
     started = false;
 
     return *this;
