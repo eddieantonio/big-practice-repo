@@ -6,7 +6,7 @@ app.config(function ($routeProvider) {
       controller: 'CustomerController',
       templateUrl: 'views/index.html'
     })
-    .when('/partial2', {
+    .when('/alt', {
       controller: 'CustomerController',
       templateUrl: 'views/alternate.html'
     })

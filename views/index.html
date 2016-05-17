@@ -11,9 +11,15 @@
 
   <br/>
 
-  <label> Name: <input type="text" ng-model="newCustomer.name" /> </label>
-  <label> City: <input type="text" ng-model="newCustomer.city" /> </label>
-  <br />
-  <button ng-click="addCustomer()"> Add Customer </button>
+  <form ng-submit="addCustomer()">
+    <label> Name: <input type="text" ng-model="newCustomer.name" /> </label>
+    <label> City: <input type="text" ng-model="newCustomer.city" /> </label>
+    <br />
+    <button type="submit"> Add Customer </button>
+  </form>
+
+  <nav>
+    <a href="#/alt"> Alternate view </a>
+  </nav>
 
 </div>
