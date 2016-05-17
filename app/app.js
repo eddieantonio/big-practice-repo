@@ -4,11 +4,11 @@ app.config(function ($routeProvider) {
   $routeProvider
     .when('/', {
       controller: 'CustomerController',
-      templateUrl: 'views/index.html'
+      templateUrl: 'app/views/index.html'
     })
     .when('/alt', {
       controller: 'CustomerController',
-      templateUrl: 'views/alternate.html'
+      templateUrl: 'app/views/alternate.html'
     })
     .otherwise({ redirectTo: '/' });
 });
