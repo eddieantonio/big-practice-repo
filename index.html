@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html ng-app lang="en">
+<html ng-app='app' lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Angular Example</title>
 
   <!-- Include Angular -->
-  <script src="bower_components/angular/angular.min.js" type="text/javascript"></script>
+  <script src="bower_components/angular/angular.min.js"></script>
 </head>
 <body>
 
-  <div ng-init="customers=[{ name: 'Dave', city: 'Phoenix'}, { name: 'Napur', city: 'Denver' }, { name: 'Heedy', city: 'Dallas'}]">
+  <div ng-controller="CustomerController">
     <label> Name: <input type="text" ng-model="nameFilt" /> </label>
     <br/>
     <ul>
@@ -20,5 +20,15 @@
     </ul>
   </div>
 
+  <script type="text/javascript">
+angular.module('app', [])
+  .controller('CustomerController', function ($scope) {
+    $scope.customers = [
+      { name: 'Dave', city: 'Phoenix'},
+      { name: 'Napur', city: 'Denver' },
+      { name: 'Heedy', city: 'Dallas'}
+    ];
+  });
+  </script>
 </body>
 </html>
