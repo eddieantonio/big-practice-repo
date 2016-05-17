@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html ng-app='app' lang="en">
+<html ng-app="exampleApp" lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Angular Example</title>
 
   <!-- Include Angular -->
   <script src="bower_components/angular/angular.min.js"></script>
+  <script src="./app.js"></script>
 </head>
 <body>
 
@@ -20,15 +21,5 @@
     </ul>
   </div>
 
-  <script type="text/javascript">
-angular.module('app', [])
-  .controller('CustomerController', function ($scope) {
-    $scope.customers = [
-      { name: 'Dave', city: 'Phoenix'},
-      { name: 'Napur', city: 'Denver' },
-      { name: 'Heedy', city: 'Dallas'}
-    ];
-  });
-  </script>
 </body>
 </html>
