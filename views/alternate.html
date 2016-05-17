@@ -1,0 +1,18 @@
+<div class="container">
+  <h2> Search Customers by Name </h2>
+  <label> Name: <input type="text" ng-model="filter.city" /> </label>
+  <br/>
+  <ul>
+    <!-- Make a table with this! -->
+    <li ng-repeat="person in customers | filter:{name:filter.city} | orderBy:'city'">
+      <output>{{ person.name }} from {{ person.city }}</output>
+    </li>
+  </ul>
+
+  <br/>
+
+  <nav>
+    <a href="#/"> Normal view </a>
+  </nav>
+
+</div>

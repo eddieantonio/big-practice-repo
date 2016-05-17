@@ -13,12 +13,28 @@ app.config(function ($routeProvider) {
     .otherwise({ redirectTo: '/' });
 });
 
-app.controller('CustomerController', function ($scope) {
-  $scope.customers = [
+app.factory('simpleFactory', function () {
+  var customers = [
     { name: 'Dave', city: 'Phoenix'},
     { name: 'Napur', city: 'Denver' },
     { name: 'Heedy', city: 'Dallas'}
   ];
+
+  return {
+    getCustomers() {
+      return customers;
+    }
+  };
+});
+
+app.controller('CustomerController', function ($scope, simpleFactory) {
+  $scope.customers = [];
+
+  init();
+
+  function init() {
+    $scope.customers = simpleFactory.getCustomers();
+  }
 
   $scope.addCustomer = function() {
     $scope.customers.push({
