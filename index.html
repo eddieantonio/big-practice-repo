@@ -6,20 +6,14 @@
 
   <!-- Include Angular -->
   <script src="bower_components/angular/angular.min.js"></script>
+  <script src="bower_components/angular-route/angular-route.min.js"></script>
+
+  <!-- Include our app. -->
   <script src="./example-app.js"></script>
 </head>
 <body>
 
-  <div ng-controller="CustomerController">
-    <label> Name: <input type="text" ng-model="nameFilt" /> </label>
-    <br/>
-    <ul>
-      <!-- Make a table with this! -->
-      <li ng-repeat="person in customers | filter:{name:nameFilt} | orderBy:'city'">
-        <output>{{ person.name }} from {{ person.city }}</output>
-      </li>
-    </ul>
-  </div>
+  <ng-view></ng-view>
 
 </body>
 </html>
