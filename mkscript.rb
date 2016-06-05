@@ -9,26 +9,7 @@ def special_method?(name)
   name =~ /^__/ || special_methods.include?(name)
 end
 
-##
-# Forwards messages to the object.
-class Proxy
-  instance_methods.each do |method|
-    undef_method(method) unless special_method?(method)
-  end
-
-  def initialize(obj)
-    @__obj = obj
-  end
-
-  private
-
-  def method_missing(name, *args, &block)
-    # Forward messages to the wrapped object.
-    @__obj.send(name, *args, &block)
-  end
-end
-
-
+# A script type, such as shell, Python, Perl, etc.
 class ScriptType
   attr_reader :name
 
@@ -78,9 +59,7 @@ class ScriptType
 
   def self.type_by_extension(extension)
     types.each_value do |type|
-      if type.match_extension?(extension)
-        return type
-      end
+      return type if type.match_extension?(extension)
     end
     fail "Unknown extension: .#{extension}"
   end
@@ -91,12 +70,10 @@ class ScriptType
     type
   end
 
-  private
   def self.types
     @instances
   end
 end
-
 
 ScriptType.add :shell do
   def match_extension?(extension)
@@ -108,7 +85,6 @@ ScriptType.add :shell do
   end
 end
 
-
 ScriptType.add :python do
   def match_extension?(extension)
     extension == 'py'
@@ -118,7 +94,6 @@ ScriptType.add :python do
     '/usr/bin/env python'
   end
 end
-
 
 ScriptType.add :perl do
   def match_extension?(extension)
@@ -138,7 +113,6 @@ use strict;
   end
 end
 
-
 ScriptType.add :erlang do
   def match_extension?(extension)
     extension == 'erl'
@@ -148,7 +122,6 @@ ScriptType.add :erlang do
     '/usr/bin/env escript'
   end
 end
-
 
 ScriptType.add :ruby do
   def match_extension?(extension)
@@ -160,11 +133,15 @@ ScriptType.add :ruby do
   end
 end
 
-
+# An editor, derived from context.
 class Editor
   @command = nil
   @args = []
   @subclasses = {}
+
+  class << self
+    attr_reader :args
+  end
 
   def edit(filename)
     pid = Process.spawn(make_arg_string(filename))
@@ -187,9 +164,9 @@ class Editor
   end
 
   def self.from_environment
-    name = ENV["VISUAL"] || ENV["EDITOR"]
+    name = ENV['VISUAL'] || ENV['EDITOR']
     if name.nil?
-      fail "Cannot determine your editor: both EDITOR and VISUAL are undefined"
+      fail 'Cannot determine your editor: both EDITOR and VISUAL are undefined'
     else
       Editor.from_command(name)
     end
@@ -200,11 +177,8 @@ class Editor
     @subclasses[name]
   end
 
-  def self.args
-    @args
-  end
-
   private
+
   def make_arg_string(filename)
     Shellwords.join(self.class.command_with_args(filename))
   end
@@ -220,33 +194,33 @@ class Editor
   end
 end
 
-
+# Definition for Vim
 class Vim < Editor
-  command "vim", "+norm G", :filename
+  command 'vim', '+norm G', :filename
 end
 
-
+# Definition for Nano
 class Nano < Editor
-  command "nano", :filename
+  command 'nano', :filename
 end
 
-
+# Definition for Emacs
 class Emacs < Editor
-  command "nano", :filename
+  command 'emacs', :filename
 end
 
-
+# The script to create or modify.
 class Script
   attr_reader :filename, :script_type
 
   def self.new(filename, &block)
     obj = super(filename)
-    Proxy.new(obj).instance_eval(&block) if block_given?
+    obj.instance_eval(&block) if block_given?
     obj
   end
 
   def initialize(filename)
-    fail "no filename given" if filename.nil?
+    fail 'No filename given' if filename.nil?
     @filename = filename
     @script_type = ScriptType.match(filename)
     @file = nil
@@ -281,7 +255,7 @@ class Script
     return false if @file.eof?
 
     # Read the first line; check for shebang.
-    first_line = @file.gets(?\n)
+    first_line = @file.gets("\n")
     return false unless first_line.start_with?('#!')
 
     path = first_line[2..-1].chomp
