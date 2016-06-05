@@ -22,7 +22,7 @@ class ScriptType
   end
 
   def template
-    "#!#{path}\n"
+    "#!#{path}\n\n\n"
   end
 
   def path
@@ -196,7 +196,7 @@ end
 
 # Definition for Vim
 class Vim < Editor
-  command 'vim', '+norm G', :filename
+  command 'vim', '+', '+star', :filename
 end
 
 # Definition for Nano
