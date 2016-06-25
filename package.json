@@ -5,7 +5,7 @@
   "keywords": "option maybe some none just nothing monad",
   "main": "lib/index.js",
   "scripts": {
-    "test": "ava"
+    "test": "tsc && ava"
   },
   "author": "Eddie Antonio Santos <easantos@ualberta.ca>",
   "license": "ISC",

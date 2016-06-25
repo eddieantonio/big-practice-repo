@@ -1,6 +1,6 @@
 import test from 'ava';
 
-import Option, {Some, None} from './';
+import Option, {Some, None} from './src';
 
 test('Option#of(null) === None', t => {
   t.is(Option.of(null), None);
@@ -21,14 +21,14 @@ test('Option#of(false) !== None', t => {
 });
 
 test('Option#map()', t => {
-  const truthy = x => !!x;
+  const truthy = (x: any) => !!x;
 
   t.is(None.map(truthy), None);
   t.deepEqual(Option.of(0).map(truthy), Option.of(false));
 });
 
 test.skip('Option#flatmap()', t => {
-  function sqrt(n) {
+  function sqrt(n: number) {
     if (n < 0) {
       return None;
     } else {
@@ -36,6 +36,6 @@ test.skip('Option#flatmap()', t => {
     }
   }
 
-  t.notThrows(() => Option.of(1).map(sqrt).get() === 1);
+  t.notThrows(() => Option.of(1).map(sqrt).get());
   t.is(Option.of(-1).map(sqrt), None);
 });
