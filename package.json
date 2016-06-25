@@ -1,0 +1,15 @@
+{
+  "name": "typescript-option",
+  "version": "1.0.0",
+  "description": "The option type",
+  "keywords": "option maybe some none just nothing monad",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "ava"
+  },
+  "author": "Eddie Antonio Santos <easantos@ualberta.ca>",
+  "license": "ISC",
+  "devDependencies": {
+    "ava": "^0.15.2"
+  }
+}
