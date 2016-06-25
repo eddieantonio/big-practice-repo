@@ -4,9 +4,10 @@ abstract class Option<T> {
 
   abstract get(): T;
   abstract getOr<U>(alternative: U): T | U;
-  abstract getOrElse<U>(otherwise: () => U): U;
+  abstract getOrElse<U>(otherwise: () => U): T | U;
 
   abstract map<U>(f: (v: T) => U): Option<U>;
+  abstract flatmap<U>(f: (v: T) => Option<U>): Option<U>;
 
   static of<T>(value: T): Option<T> {
     if (value === null || value === undefined) {
@@ -30,20 +31,24 @@ export class Some<T> implements Option<T> {
     return false;
   }
 
-  get() {
+  get(): T {
     return this.value;
   }
 
-  getOr() {
+  getOr<U>(_unused: U): T {
     return this.value;
   }
 
-  getOrElse() {
+  getOrElse<U>(_unused: () => U): T {
     return this.value;
   }
 
   map<U>(f: (v: T) => U) {
     return new Some(f(this.value));
+  }
+
+  flatmap<U>(f: (v: T) => Option<U>): Option<U> {
+    return f(this.value);
   }
 }
 
@@ -69,6 +74,10 @@ const None = new (class None<T> implements Option<T> {
   }
 
   map<U>(f: (v: T) => U): Option<U> {
+    return this as Option<any>;
+  }
+
+  flatmap<U>(f: (v: T) => Option<U>): Option<U> {
     return this as Option<any>;
   }
 });

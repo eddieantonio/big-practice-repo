@@ -5,11 +5,13 @@
   "keywords": "option maybe some none just nothing monad",
   "main": "lib/index.js",
   "scripts": {
-    "test": "tsc && ava"
+    "test": "tsc && ava",
+    "watch:test": "tsc --watch & ava --watch"
   },
   "author": "Eddie Antonio Santos <easantos@ualberta.ca>",
   "license": "ISC",
   "devDependencies": {
-    "ava": "^0.15.2"
+    "ava": "^0.15.2",
+    "typescript": "^1.8.10"
   }
 }
