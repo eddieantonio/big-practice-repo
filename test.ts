@@ -18,6 +18,28 @@ test('None#as<T>()', t => {
   t.is(option = None.as<Date>(), None as Option<any>);
 });
 
+test('Option#hasValue()', t => {
+  /* Checks for TypeScript type assertions. */
+  let some: Option<boolean> = new Some(true);
+  let none: Option<boolean> = None.as<boolean>();
+
+  t.plan(2);
+
+  if (some.hasValue()) {
+    /* TypeScript test: some.value should be unavailable if some is determined
+     * to be Option or None by the type checker.*/
+    t.is(some.value, true);
+  } else {
+    t.fail('Some#hasValue() must never be false.');
+  }
+
+  if (none.hasValue()) {
+    t.fail('None#hasValue() must never be true.');
+  } else {
+    t.pass();
+  }
+});
+
 test('Option#of(null) === None', t => {
   t.is(Option.of(null), None);
   // TODO: throw a specific error.
