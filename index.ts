@@ -80,5 +80,12 @@ const None = new (class None<T> implements Option<T> {
   flatmap<U>(f: (v: T) => Option<U>): Option<U> {
     return this as Option<any>;
   }
+
+  /**
+   * Returns None as an Option of the given type.
+   */
+  as<T>(): Option<T> {
+    return this as Option<any>;
+  }
 });
 export { None };
