@@ -36,6 +36,24 @@ test('Option#of(false) !== None', t => {
   t.notThrows(() => Option.of(false).get());
 });
 
+test('Option#of(0) !== None', t => {
+  t.true(Option.of(0).hasValue());
+  t.false(Option.of(0).empty);
+  t.notThrows(() => Option.of(0).get());
+});
+
+test('Option#of(NaN) !== None', t => {
+  t.true(Option.of(NaN).hasValue());
+  t.false(Option.of(NaN).empty);
+  t.notThrows(() => Option.of(NaN).get());
+});
+
+test('Option#of("") !== None', t => {
+  t.true(Option.of('').hasValue());
+  t.false(Option.of(``).empty);
+  t.notThrows(() => Option.of("").get());
+});
+
 test('Option#map()', t => {
   const truthy = (x: any) => !!x;
 
@@ -55,3 +73,4 @@ test('Option#flatmap()', t => {
   t.notThrows(() => Option.of(1).flatmap(sqrt).get());
   t.is(Option.of(-1).flatmap(sqrt), None as Option<any>);
 });
+
