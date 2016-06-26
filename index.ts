@@ -26,7 +26,12 @@ export class Some<T> implements Option<T> {
     this._value = value;
   }
 
-  get value() {
+  /**
+   * Get the underlying JavaScript value. Note that methods Option<T>#getOr()
+   * and Option<T>#getOrElse() are prefered over directly accesing
+   * Some<T>#value.
+   */
+  get value(): T {
     return this._value;
   }
 
@@ -60,6 +65,17 @@ const None = new (class None<T> implements Option<T> {
     return true;
   }
 
+  /**
+   * This is **always** an invalid operation. Note that the return type
+   * Invalid has no values, and is not assignable to any type. The "true"
+   * return type is never. However, the bottom/nothing/never is assignable to
+   * any value, hence Invalid prevents TypeScript from allowing trivial
+   * assignments from Invalid to something.
+   */
+  get value(): Invalid {
+    throw new ReferenceError('Cannot get value from None.');
+  }
+
   hasValue() {
     return false;
   }
@@ -88,3 +104,9 @@ const None = new (class None<T> implements Option<T> {
   }
 });
 export { None };
+
+/**
+ * A type with no values.
+ */
+class Invalid {
+}

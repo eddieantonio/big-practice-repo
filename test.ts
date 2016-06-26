@@ -36,7 +36,11 @@ test('Option#hasValue()', t => {
   if (none.hasValue()) {
     t.fail('None#hasValue() must never be true.');
   } else {
-    t.pass();
+    t.throws(
+      () => (<any> none).value,
+      ReferenceError,
+      'None#value must throw a JavaScript error.'
+    );
   }
 });
 
