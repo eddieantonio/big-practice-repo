@@ -3,7 +3,6 @@ abstract class Option<T> {
 
   abstract hasValue(): this is Some<T>;
 
-  abstract get(): T;
   abstract getOr<U>(alternative: U): T | U;
   abstract getOrElse<U>(otherwise: () => U): T | U;
 
@@ -39,10 +38,6 @@ export class Some<T> implements Option<T> {
     return false;
   }
 
-  get(): T {
-    return this.value;
-  }
-
   getOr<U>(_unused: U): T {
     return this.value;
   }
@@ -67,10 +62,6 @@ const None = new (class None<T> implements Option<T> {
 
   hasValue() {
     return false;
-  }
-
-  get(): T {
-    throw new Error();
   }
 
   getOr<U>(value: U): U {

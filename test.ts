@@ -4,7 +4,7 @@ import Option, {Some, None} from './';
 
 test('new Some(value)', t => {
   const value = {};
-  t.is(new Some(value).get(), value);
+  t.is(new Some(value).getOr({}), value);
 });
 
 test('Some#getOr()', t => {
@@ -27,7 +27,7 @@ test('Option#hasValue()', t => {
 
   if (some.hasValue()) {
     /* TypeScript test: some.value should be unavailable if some is determined
-     * to be Option or None by the type checker.*/
+     * to be Option<T> or None<T> by the type checker.*/
     t.is(some.value, true);
   } else {
     t.fail('Some#hasValue() must never be false.');
@@ -42,38 +42,36 @@ test('Option#hasValue()', t => {
 
 test('Option#of(null) === None', t => {
   t.is(Option.of(null), None);
-  // TODO: throw a specific error.
-  t.throws(() => Option.of(null).get());
+  t.false(Option.of(null).hasValue());
 });
 
 test('Option#of(undefined) === None', t => {
   t.is(Option.of(undefined), None);
-  // TODO: throw a specific error.
-  t.throws(() => Option.of(undefined).get());
+  t.false(Option.of(undefined).hasValue());
 });
 
 test('Option#of(false) !== None', t => {
   t.true(Option.of(false).hasValue());
   t.false(Option.of(false).empty);
-  t.notThrows(() => Option.of(false).get());
+  t.is(Option.of(false).getOr({}), false);
 });
 
 test('Option#of(0) !== None', t => {
   t.true(Option.of(0).hasValue());
   t.false(Option.of(0).empty);
-  t.notThrows(() => Option.of(0).get());
+  t.is(Option.of(0).getOr({}), 0);
 });
 
 test('Option#of(NaN) !== None', t => {
   t.true(Option.of(NaN).hasValue());
   t.false(Option.of(NaN).empty);
-  t.notThrows(() => Option.of(NaN).get());
+  t.true(Number.isNaN(Option.of(NaN).getOr(0)));
 });
 
 test('Option#of("") !== None', t => {
   t.true(Option.of('').hasValue());
   t.false(Option.of(``).empty);
-  t.notThrows(() => Option.of("").get());
+  t.is(Option.of("").getOr({}), "");
 });
 
 test('Option#map()', t => {
@@ -92,7 +90,7 @@ test('Option#flatmap()', t => {
     }
   }
 
-  t.notThrows(() => Option.of(1).flatmap(sqrt).get());
+  t.is(Option.of(1).flatmap(sqrt).getOr(NaN), 1);
   t.is(Option.of(-1).flatmap(sqrt), None as Option<any>);
 });
 
