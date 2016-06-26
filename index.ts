@@ -1,6 +1,7 @@
 abstract class Option<T> {
   public empty: boolean;
-  public hasValue: boolean;
+
+  abstract hasValue(): this is Some<T>;
 
   abstract get(): T;
   abstract getOr<U>(alternative: U): T | U;
@@ -23,7 +24,7 @@ export class Some<T> implements Option<T> {
   constructor(private value: T) {
   }
 
-  get hasValue() {
+  hasValue() {
     return true;
   }
 
@@ -57,7 +58,7 @@ const None = new (class None<T> implements Option<T> {
     return true;
   }
 
-  get hasValue() {
+  hasValue() {
     return false;
   }
 

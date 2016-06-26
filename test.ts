@@ -31,7 +31,7 @@ test('Option#of(undefined) === None', t => {
 });
 
 test('Option#of(false) !== None', t => {
-  t.true(Option.of(false).hasValue);
+  t.true(Option.of(false).hasValue());
   t.false(Option.of(false).empty);
   t.notThrows(() => Option.of(false).get());
 });
