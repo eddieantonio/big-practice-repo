@@ -1,19 +1,25 @@
-abstract class Option<T> {
+abstract class Option<A> {
   public empty: boolean;
 
-  abstract hasValue(): this is Some<T>;
+  abstract hasValue(): this is Some<A>;
 
-  abstract getOr<U>(alternative: U): T | U;
-  abstract getOrElse<U>(otherwise: () => U): T | U;
+  abstract getOr<B>(alternative: B): A | B;
+  abstract getOrElse<B>(otherwise: () => B): A | B;
 
-  abstract map<U>(f: (v: T) => U): Option<U>;
-  abstract flatmap<U>(f: (v: T) => Option<U>): Option<U>;
+  abstract map<B>(f: (v: A) => B): Option<B>;
+  abstract flatmap<B>(f: (v: A) => Option<B>): Option<B>;
 
-  static return<T>(value: T): Some<T> {
+  /**
+   * Wraps a value in an Option burrito.
+   */
+  static return<A>(value: A): Some<A> {
     return new Some(value);
   }
 
-  static of<T>(value: T): Option<T> {
+  /**
+   * Like return but converts `null` and `undefined` into None.
+   */
+  static of<A>(value: A): Option<A> {
     if (value === null || value === undefined) {
       return None as Option<any>;
     } else {
@@ -23,10 +29,10 @@ abstract class Option<T> {
 }
 export default Option;
 
-export class Some<T> implements Option<T> {
-  private _value: T;
+export class Some<A> implements Option<A> {
+  private _value: A;
 
-  constructor(value: T) {
+  constructor(value: A) {
     this._value = value;
   }
 
@@ -35,7 +41,7 @@ export class Some<T> implements Option<T> {
    * and Option<T>#getOrElse() are prefered over directly accesing
    * Some<T>#value.
    */
-  get value(): T {
+  get value(): A {
     return this._value;
   }
 
@@ -47,24 +53,24 @@ export class Some<T> implements Option<T> {
     return false;
   }
 
-  getOr<U>(_unused: U): T {
+  getOr<B>(_unused: B): A {
     return this.value;
   }
 
-  getOrElse<U>(_unused: () => U): T {
+  getOrElse<B>(_unused: () => B): A {
     return this.value;
   }
 
-  map<U>(f: (v: T) => U) {
+  map<B>(f: (v: A) => B): Some<B> {
     return new Some(f(this.value));
   }
 
-  flatmap<U>(f: (v: T) => Option<U>): Option<U> {
+  flatmap<B>(f: (v: A) => Option<B>): Option<B> {
     return f(this.value);
   }
 }
 
-const None = new (class None<T> implements Option<T> {
+const None = new (class None<A> implements Option<A> {
   get empty() {
     return true;
   }
@@ -84,26 +90,26 @@ const None = new (class None<T> implements Option<T> {
     return false;
   }
 
-  getOr<U>(value: U): U {
+  getOr<B>(value: B): B {
     return value;
   }
 
-  getOrElse<U>(func: () => U): U {
+  getOrElse<B>(func: () => B): B {
     return func();
   }
 
-  map<U>(f: (v: T) => U): Option<U> {
-    return this as Option<any>;
+  map<B>(f: (v: A) => B): None<B> {
+    return this as None<any>;
   }
 
-  flatmap<U>(f: (v: T) => Option<U>): Option<U> {
-    return this as Option<any>;
+  flatmap<B>(f: (v: A) => Option<B>): None<B> {
+    return this as None<any>;
   }
 
   /**
    * Returns None as an Option of the given type.
    */
-  as<T>(): Option<T> {
+  as<A>(): Option<A> {
     return this as Option<any>;
   }
 });
