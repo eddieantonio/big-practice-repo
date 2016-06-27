@@ -9,6 +9,10 @@ abstract class Option<T> {
   abstract map<U>(f: (v: T) => U): Option<U>;
   abstract flatmap<U>(f: (v: T) => Option<U>): Option<U>;
 
+  static return<T>(value: T): Some<T> {
+    return new Some(value);
+  }
+
   static of<T>(value: T): Option<T> {
     if (value === null || value === undefined) {
       return None as Option<any>;

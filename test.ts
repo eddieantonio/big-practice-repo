@@ -2,9 +2,24 @@ import test from 'ava';
 
 import Option, {Some, None} from './';
 
+
 test('new Some(value)', t => {
   const value = {};
   t.is(new Some(value).getOr({}), value);
+});
+
+test('Option.return(truthy)', t => {
+  const ref = {};
+  const sym = Symbol('arbitrary');
+  t.is(Option.return(1).value, 1);
+  t.is(Option.return(true).value, true);
+  t.is(Option.return('💩').value, '💩');
+  t.is(Option.return(sym).value, sym);
+});
+
+test('Option.return(null)', t => {
+  /* Tests that return ALWAYS wraps a given value. */
+  t.is(Option.return(null).value, null);
 });
 
 test('Some#getOr()', t => {
