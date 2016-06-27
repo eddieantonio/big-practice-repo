@@ -62,7 +62,7 @@ export class Some<A> implements Option<A> {
   }
 
   map<B>(f: (v: A) => B): Some<B> {
-    return new Some(f(this.value));
+    return Option.return(f(this.value));
   }
 
   flatmap<B>(f: (v: A) => Option<B>): Option<B> {

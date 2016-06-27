@@ -27,6 +27,7 @@ test('Some#getOr()', t => {
   t.is(new Some(value).getOr({}), value);
 });
 
+
 test('None#as<T>()', t => {
   /* Let it be some random type. */
   let option: Option<Date>;
@@ -59,35 +60,35 @@ test('Option#hasValue()', t => {
   }
 });
 
-test('Option#of(null) === None', t => {
+test('Option.of(null) === None', t => {
   t.is(Option.of(null), None);
   t.false(Option.of(null).hasValue());
 });
 
-test('Option#of(undefined) === None', t => {
+test('Option.of(undefined) === None', t => {
   t.is(Option.of(undefined), None);
   t.false(Option.of(undefined).hasValue());
 });
 
-test('Option#of(false) !== None', t => {
+test('Option.of(false) !== None', t => {
   t.true(Option.of(false).hasValue());
   t.false(Option.of(false).empty);
   t.is(Option.of(false).getOr({}), false);
 });
 
-test('Option#of(0) !== None', t => {
+test('Option.of(0) !== None', t => {
   t.true(Option.of(0).hasValue());
   t.false(Option.of(0).empty);
   t.is(Option.of(0).getOr({}), 0);
 });
 
-test('Option#of(NaN) !== None', t => {
+test('Option.of(NaN) !== None', t => {
   t.true(Option.of(NaN).hasValue());
   t.false(Option.of(NaN).empty);
   t.true(Number.isNaN(Option.of(NaN).getOr(0)));
 });
 
-test('Option#of("") !== None', t => {
+test('Option.of("") !== None', t => {
   t.true(Option.of('').hasValue());
   t.false(Option.of(``).empty);
   t.is(Option.of("").getOr({}), "");
@@ -112,4 +113,3 @@ test('Option#flatmap()', t => {
   t.is(Option.of(1).flatmap(sqrt).getOr(NaN), 1);
   t.is(Option.of(-1).flatmap(sqrt), None as Option<any>);
 });
-
