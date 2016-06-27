@@ -94,6 +94,19 @@ test('Option.of("") !== None', t => {
   t.is(Option.of("").getOr({}), "");
 });
 
+test('Option.number(finite)', t => {
+  t.is(Option.number(-1e100).getOr(NaN), -1e100);
+});
+
+test('Option.number(±∞)', t => {
+  t.is(Option.number(+Infinity).getOr(NaN), +Infinity);
+  t.is(Option.number(-Infinity).getOr(NaN), -Infinity);
+});
+
+test('Option.number(NaN)', t => {
+  t.is(Option.number(NaN), None as Option<number>);
+});
+
 test('Option#map()', t => {
   const truthy = (x: any) => !!x;
 

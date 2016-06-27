@@ -23,7 +23,21 @@ abstract class Option<A> {
     if (value === null || value === undefined) {
       return None as Option<any>;
     } else {
-      return new Some(value);
+      return Option.return(value);
+    }
+  }
+
+  /**
+   * Get rid of NaNs by using this static method!
+   *
+   * Option.number(parseInt('hello', 10))
+   *    .getOrElse(() => throw new Error('Invalid number'));
+   */
+  static number(value: number): Option<number> {
+    if (Number.isNaN(value)) {
+      return None as Option<number>;
+    } else {
+      return Option.return(value);
     }
   }
 }
