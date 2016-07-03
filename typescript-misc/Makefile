@@ -1,9 +1,11 @@
 TYPESCRIPT = tsc
 TSFLAGS = --target ES5
 
-all: lfsr.js
+FILES = $(addsuffix .js,offset lfsr)
 
-test: offset.js
+all: $(FILES)
+
+test: $(FILES)
 	node test.js
 
 %.js: %.ts
