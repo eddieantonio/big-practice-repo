@@ -9,7 +9,7 @@
     "watch:test": "tsc --watch & ava --watch"
   },
   "author": "Eddie Antonio Santos <easantos@ualberta.ca>",
-  "license": "ISC",
+  "license": "AGPL-3.0",
   "devDependencies": {
     "ava": "^0.15.2",
     "typescript": "^1.8.10"
