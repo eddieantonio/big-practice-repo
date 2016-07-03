@@ -97,3 +97,25 @@ decode_rejects_overlong_form_test() ->
     ?assertThrow(overlong_form, utf8:decode(ThreeBytes)),
     FourBytes = <<"hello", 2#11110:5, 0:3, Zero, Zero, Zero>>,
     ?assertThrow(overlong_form, utf8:decode(FourBytes)).
+
+c(X) when 0 =< X, X =< 2#111111 ->
+    <<2#10:2, X:6>>.
+
+decode_rejects_non_unicode_test() ->
+    <<First:3, Second:6, Third:6, Fourth:6>> = <<16#11FFFF:21/big>>,
+    Invalid = <<2#11110:5, First:3,
+                (c(Second))/binary,
+                (c(Third))/binary,
+                (c(Fourth))/binary>>,
+    ?assertEqual(32, bit_size(Invalid)),
+    ?assertThrow(invalid_code_point, utf8:decode(Invalid)).
+
+decode_rejects_invalid_utf8_test() ->
+    OneByte = <<1:1, 0:7>>,
+    TwoByte = <<2#110:3, 1:5, $A:8>>,
+    ThreeByte = <<2#1110:4, 1:4, (c(0))/binary, $A:8>>,
+    FourByte = <<2#11110:5, 1:3, (c(0))/binary, (c(0))/binary, $A:8>>,
+    ?assertThrow(malformed_utf8, utf8:decode(OneByte)),
+    ?assertThrow(malformed_utf8, utf8:decode(TwoByte)),
+    ?assertThrow(malformed_utf8, utf8:decode(ThreeByte)),
+    ?assertThrow(malformed_utf8, utf8:decode(FourByte)).
