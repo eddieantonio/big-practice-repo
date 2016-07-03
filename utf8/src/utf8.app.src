@@ -1,5 +1,5 @@
 {application, 'utf8',
- [{description, "An OTP library"},
+ [{description, "Encodes and decodes UTF-8 binaries."},
   {vsn, "1.0.0"},
   {registered, []},
   {applications,
@@ -9,7 +9,7 @@
   {env,[]},
   {modules, []},
 
-  {contributors, []},
-  {licenses, []},
+  {contributors, ["Eddie Antonio Santos <easantos@ualberta.ca>"]},
+  {licenses, [agpl_v3]},
   {links, []}
  ]}.
