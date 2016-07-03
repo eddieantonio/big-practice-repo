@@ -27,6 +27,9 @@ encode_char(CodePoint) when 16#0080 =< CodePoint, CodePoint =< 16#07FF ->
       2#110:3, Upper:5,
       2#10:2,  Lower:6
     >>;
+% Reject surrogate values.
+encode_char(CodePoint) when 16#D800 =< CodePoint, CodePoint =< 16#DFFF ->
+    throw(surrogate_value_disallowed);
 % Encode 16 bit characters.
 encode_char(CodePoint) when 16#0800 =< CodePoint, CodePoint =< 16#FFFF ->
     <<Upper:4, Middle:6, Lower:6>> = <<CodePoint:16/big>>,
@@ -118,5 +121,7 @@ encode_unicode_string_test() ->
                  >>,
                 utf8:encode("Cześć! " ++ [Emoji])).
 
+error_on_encode_surrogate_code_points_test() ->
+    ?assertThrow(surrogate_value_disallowed, utf8:encode([16#D87f])).
 
 -endif.
