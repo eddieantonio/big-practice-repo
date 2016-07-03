@@ -1,1 +1,2 @@
-lfsr.js
+*.js
+!test.js
