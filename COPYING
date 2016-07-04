@@ -1,0 +1,11 @@
+The unnecessary hello.c is licensed as Affero GPL (as most other source
+code in this repository). However, these files:
+
+  - Makefile
+  - pandoc-man.mk
+  - hello.1.md
+
+are licensed under Creative Commons 0 (effectively dedicated to the
+public domain).
+
+https://creativecommons.org/publicdomain/zero/1.0/
