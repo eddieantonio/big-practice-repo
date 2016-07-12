@@ -19,8 +19,6 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "debugbreak.h"
-
 static void swap (char *a, char *b) {
     char c = *a;
     *a = *b;
@@ -40,7 +38,6 @@ static void reverse_utf8_seq(char *p, unsigned multibyte_len) {
             swap(&p[1], &p[2]);
             return;
         default:
-            debug_break();
             assert(false && "Invalid byte length");
     }
 }
@@ -56,47 +53,37 @@ static int utf8_following_bytes(const char c) {
         return 3;
     } else if ((c & 0xC0) == 0x80) {
         /* UTF-8 continuation byte. */
-        return 0;
+        return -1;
     }
     assert(false && "Invalid UTF-8 byte");
 }
 
-bool reverse(char *p, size_t max_len) {
+static void fix_backwards_sequences(char *string) {
+    for (char *p = string; *p != '\0'; p++) {
+        int bytes = utf8_following_bytes(*p);
+        if (bytes < 1) {
+            continue;
+        }
+
+        /* Must swap. */
+        reverse_utf8_seq(p - bytes, bytes + 1);
+    }
+}
+
+bool reverse(char *string, size_t max_len) {
+    char *p = string;
     char *q = p + strnlen(p, max_len) - 1;
 
-    unsigned bytes_until_swap = 0;
-    unsigned multibyte_len = 0;
-    unsigned backwards_len = 0;
-
+    /* Naïve ASCII reverse first. */
     while (p < q) {
-        /* Unreverse a UTF-8 sequence found traversing forward. */
-        if (bytes_until_swap) {
-            if (--bytes_until_swap == 0) {
-                /* The bytes were swapped to the end. */
-                reverse_utf8_seq(q + multibyte_len, multibyte_len);
-            }
-        } else {
-            bytes_until_swap = utf8_following_bytes(*p);
-            multibyte_len = bytes_until_swap + 1;
-        }
-
         swap(p, q);
-
-        /* Unravel a UTF-8 sequence found traversing backwards. */
-        backwards_len = utf8_following_bytes(*p) + 1;
-        if (backwards_len > 1) {
-            reverse_utf8_seq(p - backwards_len, backwards_len);
-        }
 
         p++;
         q--;
     }
 
-    /* We may have surpassed the midpoint, so unswap the UTF-8 sequence we're in the
-     * middle of. */
-    if (bytes_until_swap) {
-        reverse_utf8_seq(q - --bytes_until_swap, multibyte_len);
-    }
+    /* Fix any sequences that went awry. */
+    fix_backwards_sequences(string);
 
     return true;
 }

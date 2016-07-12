@@ -57,8 +57,7 @@ int main(int argc, const char *argv[]) {
 
     char big_test[] = "ɼ∀🌜E🌛∀ɹ";
     assert_true(reverse(big_test, sizeof(big_test)));
-    printf("test: ``%s''\n", big_test);
-    assert_str_eq(big_test, "ɼ∀🌜E🌛∀ɹ", sizeof(big_test));
+    assert_str_eq(big_test, "ɹ∀🌛E🌜∀ɼ", sizeof(big_test));
 
     assert_end();
 }
