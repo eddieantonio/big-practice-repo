@@ -15,8 +15,8 @@
 
 all: test
 
-test-reverse: test-reverse.c reverse.o
-	$(CC) -o $@ $^
+test-reverse: test-reverse.c assert-framework.h reverse.o
+	$(CC) -o $@ $@.c reverse.o
 
 test: test-reverse
 	./$<
