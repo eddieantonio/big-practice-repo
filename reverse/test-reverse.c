@@ -46,6 +46,23 @@ static struct {
         .next = NULL                                                                 \
     }
 
+#define assert_end()                                                          \
+    for (current = assert_ctx.statuses->next;                                 \
+            current != NULL;                                                  \
+            current = current->next) {                                        \
+        if (!current->passed) {                                               \
+            fprintf(stderr, RED "FAILED: " RESET "%s\n", current->assertion); \
+        }                                                                     \
+    }                                                                         \
+    if (assert_ctx.tests_failed == 0) {                                       \
+        fprintf(stderr, GREEN "Ok! %u tests passed!" RESET "\n",              \
+                assert_ctx.tests_passed);                                     \
+        return 0;                                                             \
+    } else {                                                                  \
+        fprintf(stderr, RED "%u out of %u tests failed" RESET "\n",           \
+                assert_ctx.tests_failed, assert_ctx.test_progress);           \
+    }
+
 #define assert_true(expression)               \
     assert_ctx.test_progress++;               \
     current->next = &(struct assert_status) { \
@@ -61,6 +78,9 @@ static struct {
         assert_ctx.tests_failed++;            \
     }
 
+#define assert_str_eq(a, b, n) \
+    assert_true(strncmp(a, b, n) == 0)
+
 
 int main(int argc, const char *argv[]) {
     assert_init();
@@ -68,28 +88,16 @@ int main(int argc, const char *argv[]) {
     char empty[] = "";
     assert_true(strnlen(empty, 1) == 0);
     assert_true(reverse(empty, 0));
-    assert_true(streq(empty, "", 1));
+    assert_str_eq(empty, "", 1);
 
     assert_true(reverse(empty, 512));
-    assert_true(streq(empty, "", 1));
+    assert_str_eq(empty, "", 1);
 
     char hello[] = "hello";
     assert_true(reverse(hello, 5));
-    assert_true(streq("olleh", hello, 5));
+    assert_str_eq("olleh", hello, 5);
 
     /* TODO: UTF-8 tests. */
 
-    for (current = assert_ctx.statuses->next; current != NULL; current = current->next) {
-        if (!current->passed) {
-            fprintf(stderr, RED "FAILED: " RESET "%s\n", current->assertion);
-        }
-    }
-
-    if (assert_ctx.tests_failed == 0) {
-        fprintf(stderr, GREEN "Ok! %u tests passed!" RESET "\n", assert_ctx.tests_passed);
-        return 0;
-    } else {
-        fprintf(stderr, RED "%u out of %u tests failed" RESET "\n",
-                assert_ctx.tests_failed, assert_ctx.test_progress);
-    }
+    assert_end();
 }

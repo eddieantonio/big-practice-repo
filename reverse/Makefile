@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-all: reverse
+all: test
 
 test-reverse: test-reverse.c reverse.o
 	$(CC) -o $@ $^
