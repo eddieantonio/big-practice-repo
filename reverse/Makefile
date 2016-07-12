@@ -15,6 +15,8 @@
 
 all: test
 
+CFLAGS += -g
+
 test-reverse: test-reverse.c assert-framework.h reverse.o
 	$(CC) -o $@ $@.c reverse.o
 

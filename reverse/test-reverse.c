@@ -37,7 +37,28 @@ int main(int argc, const char *argv[]) {
     assert_true(reverse(hello, 5));
     assert_str_eq("olleh", hello, 5);
 
-    /* TODO: UTF-8 tests. */
+    /* 2-byte form. */
+    char xi[] = "Ξ";
+    assert_true(sizeof(xi) == 2 + 1);
+    assert_true(reverse(xi, sizeof(xi)));
+    assert_str_eq(xi, "Ξ", sizeof(xi));
+
+    /* 3-byte form, */
+    char multiocular[] = "ꙮ";
+    assert_true(sizeof(multiocular) == 3 + 1);
+    assert_true(reverse(multiocular, sizeof(multiocular)));
+    assert_str_eq(multiocular, "ꙮ", sizeof(multiocular));
+
+    /* 4-byte form. */
+    char poop[] = "💩";
+    assert_true(reverse(poop, sizeof(poop)));
+    assert_str_eq(poop, "💩", sizeof(poop));
+
+
+    char big_test[] = "ɼ∀🌜E🌛∀ɹ";
+    assert_true(reverse(big_test, sizeof(big_test)));
+    printf("test: ``%s''\n", big_test);
+    assert_str_eq(big_test, "ɼ∀🌜E🌛∀ɹ", sizeof(big_test));
 
     assert_end();
 }
