@@ -1,21 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 static char test_string[] = "    good  morning   that's   a    nice tnetenba     ";
 
 static char get_start(const char *input, int length) {
     for (int i = 0; i < length; i++) {
-        if (input[i] != ' ') {
+        if (!isspace(input[i])) {
             return i;
         }
     }
+    /* Did not find start. */
     return length;
 }
 
+static char get_start_no_len(const char *input) {
+    for (int i = 0;; i++) {
+        if (!isspace(input[i])) {
+            return i;
+        }
+    }
+}
+
+
 static char get_end(const char *input, int length) {
     for (int i = length - 1; i >= 0; i--) {
-        if (input[i] != ' ') {
+        if (!isspace(input[i])) {
             return i + 1;
         }
     }
@@ -30,21 +41,21 @@ static char* cleanup_string(const char *input) {
     const int clean_length = end - start;
     char *buffer = malloc(clean_length + 1);
 
-    int j = 0;
+    char *dest = buffer;
     for (int i = start; i < end; ) {
-        /* Copy the current character. */
-        if (input[i] != ' ') {
-            buffer[j++] = input[i];
-            i++;
+        int offset;
+        if (isspace(input[i])) {
+            *(dest++) = ' ';
+            offset = get_start_no_len(input + i);
         } else {
-            buffer[j++] = ' ';
-            /* Advance at least one character, skipping spaces. */
-            while (input[i] == ' ') {
-                i++;
-            }
+            /* Copy the current character. */
+            *(dest++) = input[i];
+            offset = 1;
         }
+
+        i += offset;
     }
-    buffer[j] = '\0';
+    *dest = '\0';
 
     return buffer;
 }
