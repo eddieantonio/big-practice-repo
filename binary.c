@@ -52,8 +52,16 @@ int main(int argc, char **argv) {
     }
 
     void *lib = dlopen(library, RTLD_LAZY);
+    if (lib == NULL) {
+        fprintf(stderr, "%s\n", dlerror());
+        exit(1);
+    }
     int (*binary_op)(int, int) = dlsym(lib, "binary_op");
     char* (*binary_sym)(void) = dlsym(lib, "binary_sym");
+    if ((binary_op == NULL) || (binary_sym == NULL)) {
+        fprintf(stderr, "%s\n", dlerror());
+        exit(1);
+    }
 
     int value = binary_op(a, b);
     printf("%d %s %d = %d\n", a, binary_sym(), b, value);
