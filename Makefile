@@ -1,8 +1,15 @@
-binary: binary.o binary_add.dylib binary_mul.dylib
+BIN = binary
+LIBS = $(addsuffix .dylib, binary_add binary_mul)
 
-%.dylib: %.c
-	$(CC) -dynamiclib $(CFLAGS) $(CPPFLAGS) -o $@ $<
+all: $(BIN) $(LIBS)
+$(BIN): $(BIN).o
 
-test: binary
+%.dylib: %.o
+	libtool -dynamic -compatibility_version 1 -current_version 1 -macosx_version_min 10.11 -o $@ $<
+
+clean:
+	$(RM) $(BIN) $(wildcard *.o) $(wildcard *.dylib) $(wildcard *.so)
+
+test: $(BIN) $(LIBS)
 	./$< add 13 7
 	./$< mul 13 7
