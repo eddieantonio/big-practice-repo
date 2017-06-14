@@ -3,18 +3,28 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include <err.h>
+#include <sysexits.h>
+#include <crt_externs.h>
+
 #include <dlfcn.h>
 
-static const char *program_name;
+static const char *program_name() {
+    char *name = *_NSGetArgv()[0];
+    if (strncmp(name, "./", 2) == 0) {
+        return &name[2];
+    }
+    return name;
+}
 
 static void usage(FILE *output) {
     fprintf(output, "Usage:\n");
-    fprintf(output, "  %s (add|mul) <i> <j>\n", program_name);
+    fprintf(output, "  %s (add|mul) <i> <j>\n", program_name());
 }
 
 static void usage_error(const char *msg, ...) {
     if (msg != NULL) {
-        fprintf(stderr, "%s: ", program_name);
+        fprintf(stderr, "%s: ", program_name());
         va_list ap;
         va_start(ap, msg);
         vfprintf(stderr, msg, ap);
@@ -22,7 +32,7 @@ static void usage_error(const char *msg, ...) {
         fprintf(stderr, "\n");
     }
     usage(stderr);
-    exit(2);
+    exit(EX_USAGE);
 }
 
 static int int_or_die(const char* str) {
@@ -35,8 +45,6 @@ static int int_or_die(const char* str) {
 }
 
 int main(int argc, char **argv) {
-    program_name = argv[0];
-    /* TODO: accept three arguments like subcommands. */
     if (argc != 4) {
         usage_error("requires exactly 3 arguments");
     }
@@ -53,14 +61,12 @@ int main(int argc, char **argv) {
 
     void *lib = dlopen(library, RTLD_LAZY);
     if (lib == NULL) {
-        fprintf(stderr, "%s\n", dlerror());
-        exit(1);
+        errx(EX_UNAVAILABLE, "%s", dlerror());
     }
     int (*binary_op)(int, int) = dlsym(lib, "binary_op");
     char* (*binary_sym)(void) = dlsym(lib, "binary_sym");
     if ((binary_op == NULL) || (binary_sym == NULL)) {
-        fprintf(stderr, "%s\n", dlerror());
-        exit(1);
+        errx(EX_UNAVAILABLE, "%s", dlerror());
     }
 
     int value = binary_op(a, b);

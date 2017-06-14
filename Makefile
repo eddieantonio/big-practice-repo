@@ -1,6 +1,8 @@
 BIN = binary
 LIBS = $(addsuffix .dylib, binary_add binary_mul)
 
+CFLAGS = -std=c11 -Wall -Werror
+
 all: $(BIN) $(LIBS)
 $(BIN): $(BIN).o
 
