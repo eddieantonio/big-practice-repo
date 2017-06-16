@@ -28,7 +28,6 @@ clean:
 	$(RM) $(BIN) $(wildcard *.o) $(wildcard *.dylib) $(wildcard *.so)
 
 test: $(BIN) $(LIBS)
-	@chmod a+rx binary_mul.$(SO)
 	./$< add 13 7
 	./$< mul 13 7
 	! ./$< exp 13 7
@@ -37,7 +36,8 @@ test: $(BIN) $(LIBS)
 	! ./$< add 13
 	! ./$< add
 	! ./$< add 13 7 42
-	@chmod a-rx binary_mul.$(SO)
+	@mv -f binary_mul.$(SO) .binary_mul.$(SO)
 	! ./$< mul 13 7
+	@mv .binary_mul.$(SO) binary_mul.$(SO)
 
 .PHONY: all clean test
