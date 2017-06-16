@@ -8,7 +8,7 @@ ifeq ($(shell uname -s),Darwin)
 SO = dylib
 else
 SO = so
-LDEXTRA = -Wl,-rpath=$(PWD)
+LDEXTRA = -rdynamic -Wl,-rpath=$(PWD)
 endif
 
 all: $(BIN) $(LIBS)
