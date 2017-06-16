@@ -8,55 +8,34 @@
 
 #include <dlfcn.h>
 
-static const char *program_name;
+#ifdef __APPLE__
+#define SHARED_OBJECT(name)    (name ".dylib")
+#elif __linux__
+#define SHARED_OBJECT(name)    (name ".so")
+#else
+#   error "Unknown shared object format"
+#endif
 
-__attribute__ ((constructor))
-void _set_program_name(int argc, char *argv[]) {
-    program_name = argv[0];
-    if (strncmp(program_name, "./", 2) == 0) {
-        /* Omit the dot-slash. */
-        program_name += 2;
-    }
-}
+static void usage(FILE *output);
+static void usage_error(const char *msg, ...);
+static int int_or_die(const char* str);
 
-static void usage(FILE *output) {
-    fprintf(output, "Usage:\n");
-    fprintf(output, "  %s (add|mul) <i> <j>\n", program_name);
-}
+static const char *program_name = __FILE__;
 
-static void usage_error(const char *msg, ...) {
-    if (msg != NULL) {
-        fprintf(stderr, "%s: ", program_name);
-        va_list ap;
-        va_start(ap, msg);
-        vfprintf(stderr, msg, ap);
-        va_end(ap);
-        fprintf(stderr, "\n");
-    }
-    usage(stderr);
-    exit(EX_USAGE);
-}
-
-static int int_or_die(const char* str) {
-    char *end;
-    long answer = strtol(str, &end, 10);
-    if (str == end) {
-        usage_error("invalid integer: '%s'", str);
-    }
-    return answer;
-}
 
 int main(int argc, char **argv) {
     if (argc != 4) {
         usage_error("requires exactly 3 arguments");
     }
-    int a = int_or_die(argv[2]), b = int_or_die(argv[3]);
-    const char *library;
 
+    int a = int_or_die(argv[2]),
+        b = int_or_die(argv[3]);
+
+    const char *library;
     if (strncmp(argv[1], "add", 4) == 0) {
-        library = "binary_add.dylib";
+        library = SHARED_OBJECT("binary_add");
     } else if (strncmp(argv[1], "mul", 4) == 0) {
-        library = "binary_mul.dylib";
+        library = SHARED_OBJECT("binary_mul");
     } else {
         usage_error("invalid subcommand: '%s'", argv[1]);
     }
@@ -76,4 +55,45 @@ int main(int argc, char **argv) {
 
     dlclose(lib);
     return 0;
+}
+
+
+static void usage(FILE *output) {
+    fprintf(output, "Usage:\n");
+    fprintf(output, "  %s (add|mul) <i> <j>\n", program_name);
+}
+
+
+static void usage_error(const char *msg, ...) {
+    if (msg != NULL) {
+        fprintf(stderr, "%s: ", program_name);
+        va_list ap;
+        va_start(ap, msg);
+        vfprintf(stderr, msg, ap);
+        va_end(ap);
+        fprintf(stderr, "\n");
+    }
+    usage(stderr);
+    exit(EX_USAGE);
+}
+
+
+static int int_or_die(const char* str) {
+    char *end;
+    long answer = strtol(str, &end, 10);
+    if (str == end) {
+        usage_error("invalid integer: '%s'", str);
+    }
+    return answer;
+}
+
+
+/* Automatically sets the program name variable. */
+__attribute__ ((constructor))
+void _set_program_name(int argc, char *argv[]) {
+    program_name = argv[0];
+    if (strncmp(program_name, "./", 2) == 0) {
+        /* Omit the dot-slash. */
+        program_name += 2;
+    }
 }
