@@ -8,11 +8,12 @@ ifeq ($(shell uname -s),Darwin)
 SO = dylib
 else
 SO = so
+LDEXTRA = -Wl,-rpath=$(PWD)
 endif
 
 all: $(BIN) $(LIBS)
 
-$(BIN): LDFLAGS := $(LDFLAGS) -Wl,-rpath=$(PWD)
+$(BIN): LDFLAGS := $(LDFLAGS) $(LDEXTRA)
 $(BIN): $(BIN).o
 
 %.dylib: %.o
