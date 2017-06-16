@@ -5,26 +5,28 @@
 
 #include <err.h>
 #include <sysexits.h>
-#include <crt_externs.h>
 
 #include <dlfcn.h>
 
-static const char *program_name() {
-    char *name = *_NSGetArgv()[0];
-    if (strncmp(name, "./", 2) == 0) {
-        return &name[2];
+static const char *program_name;
+
+__attribute__ ((constructor))
+void _set_program_name(int argc, char *argv[]) {
+    program_name = argv[0];
+    if (strncmp(program_name, "./", 2) == 0) {
+        /* Omit the dot-slash. */
+        program_name += 2;
     }
-    return name;
 }
 
 static void usage(FILE *output) {
     fprintf(output, "Usage:\n");
-    fprintf(output, "  %s (add|mul) <i> <j>\n", program_name());
+    fprintf(output, "  %s (add|mul) <i> <j>\n", program_name);
 }
 
 static void usage_error(const char *msg, ...) {
     if (msg != NULL) {
-        fprintf(stderr, "%s: ", program_name());
+        fprintf(stderr, "%s: ", program_name);
         va_list ap;
         va_start(ap, msg);
         vfprintf(stderr, msg, ap);
